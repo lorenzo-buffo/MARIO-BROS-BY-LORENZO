@@ -33,6 +33,11 @@ export class Preloader extends Scene
         this.load.setPath('assets');
         this.load.image('logo', 'logo.png');
         this.load.image("cesped", "cesped.png");
+        this.load.image("bloqueNormal", "bloque.png");
+        this.load.image("bloqueMisterioso", "bloque-misterioso.png");
+        this.load.image("tuboCorto", "tuboCorto.png");
+        this.load.image("tuboMediano", "tuboMediano.png");
+        this.load.image("tuboLargo", "tuboLargo.png");
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
     }
 

@@ -8,10 +8,11 @@ import { Preloader } from './scenes/Preloader';
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config = {
     type: Phaser.AUTO,
-    width: 1024,
-    height: 768,
+    width: 1000,
+    height: 700,
     parent: 'game-container',
     backgroundColor: '#028af8',
+    pixelArt: true,  // Asegura que los sprites se vean nítidos al escalar
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH
@@ -19,7 +20,7 @@ const config = {
     physics: {
         default: "arcade",
         arcade: {
-          gravity: { y: 0 },
+            gravity: { y: 300 },
         },
     },
     scene: [

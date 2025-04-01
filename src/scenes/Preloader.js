@@ -31,16 +31,36 @@ export class Preloader extends Scene
     {
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
-
         this.load.image('logo', 'logo.png');
+        this.load.image("cesped", "cesped.png");
+        this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
     }
 
     create ()
     {
-        //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
-        //  For example, you can define global animations here, so we can use them in other scenes.
+          // Crear la animación de personaje
+          this.anims.create({
+            key: 'personaje-camina',
+            frames: this.anims.generateFrameNumbers('personaje', { start: 1, end: 3}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
 
-        //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
+        //animacion saltar
+        this.anims.create({
+            key: 'personaje-salta',
+            frames: [{ key: 'personaje', frame: 5 }], 
+            frameRate: 1,  
+            repeat: 0
+        });
+
+    //animacion morir
+    this.anims.create({
+        key: 'personaje-muere',
+        frames: [{ key: 'personaje', frame: 4}], 
+        frameRate: 1,  
+        repeat: 0
+    });
         this.scene.start('MainMenu');
     }
 }

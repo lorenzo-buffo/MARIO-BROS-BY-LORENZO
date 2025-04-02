@@ -34,11 +34,14 @@ export class Preloader extends Scene
         this.load.image('logo', 'logo.png');
         this.load.image("cesped", "cesped.png");
         this.load.image("bloqueNormal", "bloque.png");
-        this.load.image("bloqueMisterioso", "bloque-misterioso.png");
         this.load.image("tuboCorto", "tuboCorto.png");
         this.load.image("tuboMediano", "tuboMediano.png");
         this.load.image("tuboLargo", "tuboLargo.png");
+        this.load.image("bloqueInmovil", "bloqueInmovil.png")
+        this.load.image("castillo", "castillo.png")
+        this.load.image("bandera", "bandera.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
+        this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 40, frameHeight: 40 });
     }
 
     create ()
@@ -66,6 +69,14 @@ export class Preloader extends Scene
         frameRate: 1,  
         repeat: 0
     });
+
+//animacion de bloque misterioso
+          this.anims.create({
+            key: 'bloqueMisteriosoAnim',
+            frames: this.anims.generateFrameNumbers('bloqueMisterioso', { start: 0, end: 2}), 
+            frameRate: 3, 
+            repeat: -1 
+        });
         this.scene.start('MainMenu');
     }
 }

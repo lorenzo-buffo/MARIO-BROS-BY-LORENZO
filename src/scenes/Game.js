@@ -35,7 +35,7 @@ export class Game extends Scene
         //colision suelo 1
         this.cespedColision.create(40, 660, null).setSize(7400, 80).setVisible(false);
         //colision suelo 2
-        this.cespedColision.create(4300, 660, null).setSize(800, 80).setVisible(false);
+        this.cespedColision.create(4300, 660, null).setSize(600, 80).setVisible(false);
         //colision suelo 3
         this.cespedColision.create(6700, 660, null).setSize(3600, 80).setVisible(false);
         // COLISION SUELO 4
@@ -77,7 +77,7 @@ export class Game extends Scene
 
 
         // Crear el personaje
-        this.personaje = this.physics.add.sprite(40, 550, "personaje").setScale(2.5).setGravityY(1300);
+        this.personaje = this.physics.add.sprite(100, 550, "personaje").setScale(2.5).setGravityY(1300);
         this.personaje.setCollideWorldBounds(true);
         this.personaje.isDead = false;
 
@@ -162,6 +162,14 @@ export class Game extends Scene
         // Colisión entre el personaje y los tubos
         this.physics.add.collider(this.personaje, this.tubos);
 
+        //crear enemigo goomba
+        this.goomba = this.physics.add.sprite(1300, 550, "goomba").setScale(2).setGravityY(1300)
+        this.goomba.anims.play("goomba-camina", true)
+        this.physics.add.collider(this.goomba, this.cespedColision);
+        this.physics.add.collider(this.goomba, this.tubos);
+        this.physics.add.collider(this.personaje, this.goomba, this.colisionEnemigoGoomba, null, this);
+        this.goombaActiva = false; 
+
         // Crear los cursores
         this.keys = this.input.keyboard.createCursorKeys();
     }
@@ -211,5 +219,39 @@ export class Game extends Scene
                 this.scene.restart();
             });
         }
+        if (!this.goombaActiva && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.goomba.x, this.goomba.y) < 500) {
+            this.goomba.setVelocityX(-80); // NUEVO: empieza a moverse hacia la izquierda
+            this.goombaActiva = true; // NUEVO: ya está activado
+        }
     }
-}
+
+    colisionEnemigoGoomba(personaje, goomba) {
+        if (personaje.body.touching.down && goomba.body.touching.up) {
+            goomba.anims.play("goomba-muerte", true);
+            goomba.setVelocityX(0);
+    
+            setTimeout(() => {
+                goomba.destroy();
+            }, 300);
+    
+            // Hacemos que el personaje dé un pequeño salto
+            personaje.setVelocityY(-350);
+        }
+        else{
+              this.morirPersonaje(personaje);
+              goomba.setVelocityX(0)
+        }
+    }    
+
+    morirPersonaje(game){
+        this.personaje.isDead = true;
+            this.personaje.anims.play("personaje-muere", true);
+            this.personaje.setVelocity(0, 0);
+            this.personaje.setVelocityY(-400);
+
+            // Reiniciar la escena después de 2 segundos
+            this.time.delayedCall(2000, () => {
+                this.scene.restart();
+            });
+        }
+    }

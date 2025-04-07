@@ -41,6 +41,7 @@ export class Preloader extends Scene
         this.load.image("castillo", "castillo.png")
         this.load.image("bandera", "bandera.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
+        this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 40, frameHeight: 40 });
     }
 
@@ -77,6 +78,21 @@ export class Preloader extends Scene
             frameRate: 3, 
             repeat: -1 
         });
+        //enemigo muerte GOOMBA
+        this.anims.create({
+            key: 'goomba-muerte',
+            frames: [{ key: 'goomba', frame: 2 }], 
+            frameRate: 1,  
+            repeat: 0
+        });
+        //animacion caminar goomba
+        this.anims.create({
+            key: 'goomba-camina',
+            frames: this.anims.generateFrameNumbers('goomba', { start: 0, end: 1}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
+
         this.scene.start('MainMenu');
     }
 }

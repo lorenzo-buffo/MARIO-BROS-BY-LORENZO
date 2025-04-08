@@ -42,7 +42,7 @@ export class Preloader extends Scene
         this.load.image("bandera", "bandera.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 40, frameHeight: 40 });
+        this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});
     }
 
     create ()

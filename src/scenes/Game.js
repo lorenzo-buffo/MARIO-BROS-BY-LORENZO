@@ -90,7 +90,14 @@ export class Game extends Scene
         this.personaje = this.physics.add.sprite(100, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
         this.personaje.setCollideWorldBounds(true);
         this.personaje.isDead = false;
+        this.velocidadActual = 0;
+        this.velocidadMaxima = 160;
+        this.aceleracion = 10;
+        this.frenado = 20;
+        this.estaSaltando = false;
+        this.tiempoSalto = 0;
 
+  
         // Colisión entre el personaje y el césped
         this.physics.add.collider(this.personaje, this.cespedColision);
 
@@ -177,56 +184,98 @@ export class Game extends Scene
         this.keys = this.input.keyboard.createCursorKeys();
     }
 
-    update()
-    {
+    update() {
+
         // No permitir movimiento si el personaje está muerto
         if (this.personaje.isDead) return;
-
-        // Movimiento a la izquierda
-        if (this.keys.left.isDown) {
-            this.personaje.setVelocityX(-200); 
-            this.personaje.flipX = true;
-            this.personaje.anims.play("personaje-camina", true);
-        }
-        // Movimiento a la derecha
-        else if (this.keys.right.isDown) {
-            this.personaje.setVelocityX(200); 
+    
+        // Aceleración a la derecha
+        if (this.keys.right.isDown) {
+            this.velocidadActual += this.aceleracion;
+            if (this.velocidadActual > this.velocidadMaxima) {
+                this.velocidadActual = this.velocidadMaxima;
+            }
+            this.personaje.setVelocityX(this.velocidadActual);
             this.personaje.flipX = false;
-            this.personaje.anims.play("personaje-camina", true);
+    
+            // ANIMACIÓN DE CAMINAR A LA DERECHA
+            if (this.personaje.body.touching.down) {
+                this.personaje.anims.play("personaje-camina", true);
+            }
         }
+        // Aceleración a la izquierda
+        else if (this.keys.left.isDown) {
+            this.velocidadActual -= this.aceleracion;
+            if (this.velocidadActual < -this.velocidadMaxima) {
+                this.velocidadActual = -this.velocidadMaxima;
+            }
+            this.personaje.setVelocityX(this.velocidadActual);
+            this.personaje.flipX = true;
+    
+            // ANIMACIÓN DE CAMINAR A LA IZQUIERDA
+            if (this.personaje.body.touching.down) {
+                this.personaje.anims.play("personaje-camina", true);
+            }
+        }
+        // Cuando no se presiona ninguna tecla
         else {
-            this.personaje.setVelocityX(0); 
+            if (this.velocidadActual > 0) {
+                this.velocidadActual -= this.frenado;
+                if (this.velocidadActual < 0) this.velocidadActual = 0;
+            } else if (this.velocidadActual < 0) {
+                this.velocidadActual += this.frenado;
+                if (this.velocidadActual > 0) this.velocidadActual = 0;
+            }
+    
+            this.personaje.setVelocityX(this.velocidadActual);
+        // Animación de quieto SOLO si está tocando el suelo
+        if (this.personaje.body.touching.down && this.velocidadActual === 0) {
             this.personaje.anims.stop();
-            this.personaje.setTexture("personaje", 0);
-        }
-
-        // Movimiento de salto
-        if (this.keys.up.isDown && this.personaje.body.touching.down) {
-            this.personaje.setVelocityY(-500);
+            this.personaje.setTexture("personaje", 0); // Frame 0 = personaje quieto
+             }
+         }
+    
+         if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
+            this.personaje.setVelocityY(-300); // impulso inicial
             this.personaje.anims.play("personaje-salta", true);
-        } else if (this.personaje.body.velocity.y !== 0) {
-            //mantiene la animación de salto mientras está en el aire
+            this.estaSaltando = true;
+            this.tiempoSalto = 0;
+        }
+        // Mantener el salto más alto mientras se mantiene la tecla
+        else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 15) {
+            this.personaje.setVelocityY(this.personaje.body.velocity.y - 20); // impulso extra
+            this.tiempoSalto++;
             this.personaje.anims.play("personaje-salta", true);
         }
-
-
+        // Cuando se suelta la tecla o se supera el tiempo
+        if (this.keys.up.isUp) {
+            this.estaSaltando = false;
+        }
+        
+        // Si está en el aire y no está saltando (por caída, por ejemplo)
+        if (!this.personaje.body.touching.down && !this.estaSaltando) {
+            this.personaje.anims.play("personaje-salta", true);
+        }
+    
         // Detectar muerte por caída
         if (this.personaje.y > 230) {
             this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);
             this.personaje.setVelocity(0, 0);
             this.personaje.setVelocityY(-400);
-
-            // Reiniciar la escena después de 2 segundos
+    
             this.time.delayedCall(2000, () => {
                 this.scene.restart();
             });
         }
+    
+        // Activar Goomba
         if (!this.goombaActiva && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.goomba.x, this.goomba.y) < 500) {
-            this.goomba.setVelocityX(-35); // NUEVO: empieza a moverse hacia la izquierda
-            this.goombaActiva = true; // NUEVO: ya está activado
+            this.goomba.setVelocityX(-35);
+            this.goombaActiva = true;
         }
     }
+    
 
     colisionEnemigoGoomba(personaje, goomba) {
         if (personaje.body.touching.down && goomba.body.touching.up) {

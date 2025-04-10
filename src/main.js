@@ -29,7 +29,7 @@ const config = {
         Preloader,
         MainMenu,
         Game,
-        GameOver
+        GameOver,
     ]
 };
 

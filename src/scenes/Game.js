@@ -172,12 +172,17 @@ export class Game extends Scene
         // Colisión entre el personaje y los tubos
         this.physics.add.collider(this.personaje, this.tubos);
 
-        //crear enemigo goomba
-        this.goomba = this.physics.add.sprite(500, 200, "goomba").setGravityY(1300)
-        this.goomba.anims.play("goomba-camina", true)
-        this.physics.add.collider(this.goomba, this.cespedColision);
-        this.physics.add.collider(this.goomba, this.tubos);
-        this.physics.add.collider(this.personaje, this.goomba, this.colisionEnemigoGoomba, null, this);
+        this.goombas = this.physics.add.group();
+    this.goombas.create(120, 208, 'goomba');
+
+    // Goombas adicionales
+    this.goombas.create(160, 208, 'goomba');
+    this.goombas.create(200, 208, 'goomba');
+    this.goombas.create(240, 208, 'goomba');
+
+        this.physics.add.collider(this.goombas, this.cespedColision);
+        this.physics.add.collider(this.goombas, this.tubos);
+        this.physics.add.collider(this.personaje, this.goombas, this.colisionEnemigoGoomba, null, this);
         this.goombaActiva = false; 
 
         // Crear los cursores
@@ -269,21 +274,28 @@ export class Game extends Scene
             });
         }
     
-        // Activar Goomba
-        if (!this.goombaActiva && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.goomba.x, this.goomba.y) < 500) {
-            this.goomba.setVelocityX(-35);
-            this.goombaActiva = true;
+        if (!this.goombaActiva) {
+            const primerGoomba = this.goombas.getFirstAlive();
+            if (primerGoomba && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, primerGoomba.x, primerGoomba.y) < 500) {
+                this.goombas.children.iterate(goomba => {
+                    if (goomba) {
+                        goomba.setVelocityX(-35);
+                        goomba.anims.play("goomba-camina", true);
+                    }
+                });
+                this.goombaActiva = true;
+            }
         }
     }
     
 
-    colisionEnemigoGoomba(personaje, goomba) {
-        if (personaje.body.touching.down && goomba.body.touching.up) {
-            goomba.anims.play("goomba-muerte", true);
-            goomba.setVelocityX(0);
+    colisionEnemigoGoomba(personaje, goombas) {
+        if (personaje.body.touching.down && goombas.body.touching.up) {
+            goombas.anims.play("goomba-muerte", true);
+            goombas.setVelocityX(0);
     
             setTimeout(() => {
-                goomba.destroy();
+                goombas.destroy();
             }, 300);
     
             // Hacemos que el personaje dé un pequeño salto
@@ -291,7 +303,7 @@ export class Game extends Scene
         }
         else{
               this.morirPersonaje(personaje);
-              goomba.setVelocityX(0)
+              goombas.setVelocityX(0)
         }
     }    
 

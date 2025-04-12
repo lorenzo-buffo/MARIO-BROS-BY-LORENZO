@@ -49,7 +49,10 @@ export class Preloader extends Scene
         this.load.image("NubeChica", "nube2.png")
         this.load.image("NubeMediana", "nube1.png")
         this.load.image("Caparazon", "caparazon.png")
+        this.load.image("Hongo", "Hongo.png")
+        this.load.image("bloqueVacio", "bloqueVacio.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
+        this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 16 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("koopa", "koopa.png" , { frameWidth: 16, frameHeight: 16 });
@@ -65,10 +68,26 @@ export class Preloader extends Scene
             repeat: -1 
         });
 
+        //Crear la animación de personaje grande
+          this.anims.create({
+            key: 'PersonajeGrande-camina',
+            frames: this.anims.generateFrameNumbers('PersonajeGrande', { start: 1, end: 3}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
+
         //animacion saltar
         this.anims.create({
             key: 'personaje-salta',
             frames: [{ key: 'personaje', frame: 5 }], 
+            frameRate: 1,  
+            repeat: 0
+        });
+
+        //animacion saltar
+        this.anims.create({
+            key: 'PersonajeGrande-salta',
+            frames: [{ key: 'PersonajeGrande', frame: 5 }], 
             frameRate: 1,  
             repeat: 0
         });

@@ -10,61 +10,84 @@ export class Game extends Scene
     {
         this.add.image(2790, 186, "MontañaGrande").setScale(0.7)
         this.add.image(2645, 200, "ArbustoMediano").setScale(0.7)
-        // Crear TILES SPRITES  
-        this.cesped1 = this.add.tileSprite(0, 244, 2496, 64, "cesped");
-        this.cesped2 = this.add.tileSprite(1480, 244, 304, 64, "cesped");
-        this.cesped3 = this.add.tileSprite(2295, 244, 1181, 64, "cesped");
-        this.cesped4 = this.add.tileSprite(3700, 244, 1500, 64, "cesped");
-        this.bloqueLargo = this.add.tileSprite(1600, 80, 152, 16, "bloqueNormal");
-        this.bloqueInmovil1 = this.add.tileSprite(2588, 204, 64, 16, "bloqueInmovil");
-        this.bloqueInmovil2 = this.add.tileSprite(2596, 188, 48, 16, "bloqueInmovil");
-        this.bloqueInmovil3 = this.add.tileSprite(2604, 172, 32, 16, "bloqueInmovil");
-        this.bloqueInmovil4 = this.add.tileSprite(2612, 156, 16, 16, "bloqueInmovil");
-        this.bloqueInmovil5 = this.add.tileSprite(2700, 204, 64, 16, "bloqueInmovil");
-        this.bloqueInmovil6 = this.add.tileSprite(2692, 188, 48, 16, "bloqueInmovil");
-        this.bloqueInmovil7 = this.add.tileSprite(2684, 172, 32, 16, "bloqueInmovil");
-        this.bloqueInmovil8 = this.add.tileSprite(2676, 156, 16, 16, "bloqueInmovil");
-        this.bloqueInmovil9 = this.add.tileSprite(2846, 204, 80, 16, "bloqueInmovil");
-        this.bloqueInmovil10 = this.add.tileSprite(2854, 188, 64, 16, "bloqueInmovil");
-        this.bloqueInmovil11 = this.add.tileSprite(2862, 172, 48, 16, "bloqueInmovil");
-        this.bloqueInmovil12 = this.add.tileSprite(2870, 156, 32, 16, "bloqueInmovil");
-        this.bloqueInmovil13 = this.add.tileSprite(2982, 204, 64, 16, "bloqueInmovil");
-        this.bloqueInmovil14 = this.add.tileSprite(2974, 188, 48, 16, "bloqueInmovil");
-        this.bloqueInmovil14 = this.add.tileSprite(2966, 172, 32, 16, "bloqueInmovil");
-        this.bloqueInmovil14 = this.add.tileSprite(2958, 156, 16, 16, "bloqueInmovil");
+            // Crear TILES SPRITES  
+        const cespedData = [
+            { x: 0, y: 244, w: 2496, h: 64 },
+            { x: 1480, y: 244, w: 304, h: 64 },
+            { x: 2295, y: 244, w: 1181, h: 64 },
+            { x: 3700, y: 244, w: 1500, h: 64 }
+        ];
         
-        //colision especial
+        this.cespeds = cespedData.map(data =>
+            this.add.tileSprite(data.x, data.y, data.w, data.h, "cesped")
+        );
+        
+        // Bloque largo
+        this.bloqueLargo = this.add.tileSprite(1600, 80, 152, 16, "bloqueNormal");
+        
+        // Datos de bloques inmóviles
+        const bloquesInmovilesData = [
+            { x: 2588, y: 204, w: 64 },
+            { x: 2596, y: 188, w: 48 },
+            { x: 2604, y: 172, w: 32 },
+            { x: 2612, y: 156, w: 16 },
+            { x: 2700, y: 204, w: 64 },
+            { x: 2692, y: 188, w: 48 },
+            { x: 2684, y: 172, w: 32 },
+            { x: 2676, y: 156, w: 16 },
+            { x: 2846, y: 204, w: 80 },
+            { x: 2854, y: 188, w: 64 },
+            { x: 2862, y: 172, w: 48 },
+            { x: 2870, y: 156, w: 32 },
+            { x: 2982, y: 204, w: 64 },
+            { x: 2974, y: 188, w: 48 },
+            { x: 2966, y: 172, w: 32 },
+            { x: 2958, y: 156, w: 16 }
+        ];
+        
+        this.bloquesInmoviles = bloquesInmovilesData.map(data =>
+            this.add.tileSprite(data.x, data.y, data.w, 16, "bloqueInmovil")
+        );
+        
+        // Grupo muro especial
         this.muroColision = this.physics.add.staticGroup();
         this.muroColision.create(2588, 204, null).setSize(64, 16).setVisible(false);
-        // Crear grupo estático de colisiones
+
+        // Grupo de colisiones de césped y bloques
         this.cespedColision = this.physics.add.staticGroup();
-        //colision suelo 1
-        this.cespedColision.create(0, 244, null).setSize(2496, 64).setVisible(false);
-        //colision suelo 2
-        this.cespedColision.create(1480, 244, null).setSize(304, 64).setVisible(false);
-        //colision suelo 3
-        this.cespedColision.create(2295, 244, null).setSize(1181, 64).setVisible(false);
-        // COLISION SUELO 4
-        this.cespedColision.create(3700, 244, null).setSize(1500, 64).setVisible(false);
-        //colision bloque largo
-        this.cespedColision.create(1600, 80, null).setSize(152, 16).setVisible(false);
-        //colision bloques inmoviles
-        this.cespedColision.create(2596, 188, null).setSize(48, 16).setVisible(false);
-        this.cespedColision.create(2604, 172, null).setSize(32, 16).setVisible(false);
-        this.cespedColision.create(2612, 155, null).setSize(16, 16).setVisible(false);
-        this.cespedColision.create(2700, 204, null).setSize(64, 16).setVisible(false);
-        this.cespedColision.create(2692, 188, null).setSize(48, 16).setVisible(false);
-        this.cespedColision.create(2684, 172, null).setSize(32, 16).setVisible(false);
-        this.cespedColision.create(2676, 156, null).setSize(16, 16).setVisible(false);
-        this.cespedColision.create(2846, 204, null).setSize(80, 16).setVisible(false);
-        this.cespedColision.create(2854, 188, null).setSize(64, 16).setVisible(false);
-        this.cespedColision.create(2862, 172, null).setSize(48, 16).setVisible(false);
-        this.cespedColision.create(2870, 156, null).setSize(32, 16).setVisible(false);
-        this.cespedColision.create(2982, 204, null).setSize(64, 16).setVisible(false);
-        this.cespedColision.create(2974, 188, null).setSize(48, 16).setVisible(false);
-        this.cespedColision.create(2966, 172, null).setSize(32, 16).setVisible(false);
-        this.cespedColision.create(2958, 156, null).setSize(16, 16).setVisible(false);
-        
+
+        // Datos de colisiones
+        const colisionesData = [
+        { x: 0, y: 244, w: 2496, h: 64 },
+        { x: 1480, y: 244, w: 304, h: 64 },
+        { x: 2295, y: 244, w: 1181, h: 64 },
+        { x: 3700, y: 244, w: 1500, h: 64 },
+        { x: 1600, y: 80, w: 152, h: 16 },
+        { x: 2596, y: 188, w: 48, h: 16 },
+        { x: 2604, y: 172, w: 32, h: 16 },
+        { x: 2612, y: 155, w: 16, h: 16 },
+        { x: 2700, y: 204, w: 64, h: 16 },
+        { x: 2692, y: 188, w: 48, h: 16 },
+        { x: 2684, y: 172, w: 32, h: 16 },
+        { x: 2676, y: 156, w: 16, h: 16 },
+        { x: 2846, y: 204, w: 80, h: 16 },
+        { x: 2854, y: 188, w: 64, h: 16 },
+        { x: 2862, y: 172, w: 48, h: 16 },
+        { x: 2870, y: 156, w: 32, h: 16 },
+        { x: 2982, y: 204, w: 64, h: 16 },
+        { x: 2974, y: 188, w: 48, h: 16 },
+        { x: 2966, y: 172, w: 32, h: 16 },
+        { x: 2958, y: 156, w: 16, h: 16 }
+        ];
+
+        // Crear las colisiones desde los datos
+        colisionesData.forEach(data => {
+        this.cespedColision.create(data.x, data.y, null)
+            .setSize(data.w, data.h)
+            .setVisible(false);
+        });
+
+  
         let anchoBloque = 144; // 9 bloques de 16px = 144
         let posicionX = 3490;
         let posicionY = 204;
@@ -138,7 +161,7 @@ export class Game extends Scene
          
          
         // Crear el personaje
-        this.personaje = this.physics.add.sprite(2200, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
+        this.personaje = this.physics.add.sprite(10, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
         this.personaje.setCollideWorldBounds(true);
         this.personaje.isDead = false;
         this.velocidadActual = 0;
@@ -162,23 +185,47 @@ export class Game extends Scene
 
         // Crear el bloque misterioso con la animación
         this.bloqueMisterioso = this.physics.add.staticGroup();
-        this.bloqueMisterioso.create(330, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        //hongo
-        this.bloqueMisterioso.create(416, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(432, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(448, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(1495, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(1800, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(2064, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(2112, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        //hongo
-        this.bloqueMisterioso.create(2112, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(2160, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(2472, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(2488, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.bloqueMisterioso.create(3232, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
-        this.physics.add.collider(this.personaje, this.bloqueMisterioso);
-       
+        this.bloqueMisterioso1 = this.bloqueMisterioso.create(330, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso1.originalY = 150;
+        this.bloqueMisterioso2 = this.bloqueMisterioso.create(416, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso2.originalY = 150;
+        this.bloqueMisterioso3 = this.bloqueMisterioso.create(432, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso3.originalY = 80;
+        this.bloqueMisterioso4 = this.bloqueMisterioso.create(448, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso4.originalY = 150;
+        this.bloqueMisterioso5 = this.bloqueMisterioso.create(1495, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso5.originalY = 150;
+        this.bloqueMisterioso6 = this.bloqueMisterioso.create(1800, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso6.originalY = 80;
+        this.bloqueMisterioso7 = this.bloqueMisterioso.create(2064, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso7.originalY = 150;
+        this.bloqueMisterioso8 = this.bloqueMisterioso.create(2112, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso8.originalY = 150;
+        this.bloqueMisterioso9 = this.bloqueMisterioso.create(2112, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso9.originalY = 80;
+        this.bloqueMisterioso10 = this.bloqueMisterioso.create(2160, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso10.originalY = 150;
+        this.bloqueMisterioso11 = this.bloqueMisterioso.create(2472, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso11.originalY = 80;
+        this.bloqueMisterioso12 = this.bloqueMisterioso.create(2488, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso12.originalY = 80;
+        this.bloqueMisterioso13 = this.bloqueMisterioso.create(3232, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        this.bloqueMisterioso13.originalY = 150;
+        this.physics.add.collider(this.personaje, this.bloqueMisterioso, (personaje, bloque) => {
+            // Verifica si la parte superior del personaje está tocando la parte superior del bloque
+            // Y además, que el personaje esté dentro de un rango en el eje X del bloque para evitar activaciones por los costados
+            if (
+                personaje.body.top <= bloque.y + bloque.height / 2 && 
+                personaje.body.bottom > bloque.y - bloque.height / 2 &&
+                Math.abs(personaje.x - bloque.x) < bloque.width / 2 // Verifica que el personaje esté dentro del rango de la anchura del bloque
+            ) {
+                // Llamar a la función para hacer saltar el bloque solo cuando el personaje toque la parte superior
+                this.hacerSaltarBloque(bloque);
+            }
+        });
+        
+        
+
 
         //crear bloque noermal
         this.bloqueNormal = this.physics.add.staticGroup();
@@ -232,143 +279,138 @@ export class Game extends Scene
         this.goombas.create(750, 208, 'goomba');
         this.goombas.create(900, 208, 'goomba');
         this.goombas.create(950, 208, 'goomba');
-        this.goombas.create(2180, 208, 'goomba');
+        this.goombas.create(1900, 208, 'goomba');
+        this.goombas.create(1920, 208, 'goomba');
         this.goombas.create(2200, 208, 'goomba');
+        this.goombas.create(2220, 208, 'goomba');
+        this.goombas.create(2350, 208, 'goomba');
+        this.goombas.create(2370, 208, 'goomba');
         this.goombas.create(2450, 208, 'goomba');
-        this.goombas.create(2500, 208, 'goomba');
-        this.goombas.create(2580, 208, 'goomba');
-        this.goombas.create(2620, 208, 'goomba');
+        this.goombas.create(2470, 208, 'goomba');
         this.goombas.create(3250, 208, 'goomba');
         this.goombas.create(3300, 208, 'goomba');
-        this.goombas.create(1680, 60, 'goomba');
+        this.goombas.create(1500, 60, 'goomba');
+        this.goombas.create(1550, 60, 'goomba');
 
         this.physics.add.collider(this.goombas, this.cespedColision);
         this.physics.add.collider(this.goombas, this.tubos, this.rebotarGoomba, null, this);
         this.physics.add.collider(this.personaje, this.goombas, this.colisionEnemigoGoomba, null, this);
         this.goombaActiva = false; 
 
-        // Crear al Koopa
-        this.koopa = this.physics.add.sprite(2300, 208, 'koopa');
-        // Hacer que Koopa se mueva
-        this.koopa.setVelocityX(-30);
-        this.koopa.anims.play('koopa-camina', true);
+                // Crear al Koopa
+        this.koopa = this.physics.add.sprite(2150, 208, 'koopa');
+        this.koopa.setVelocityX(0);  // Quieto al principio.
         this.koopa.setCollideWorldBounds(true);
         this.physics.add.collider(this.koopa, this.cespedColision);
-        // Colisión entre jugador y Koopa
         this.physics.add.overlap(this.personaje, this.koopa, this.hitKoopa, null, this);
-        this.koopaActiva = false; 
+        this.koopaActiva = false;
         
+        //HONGOS
+        this.hongos = this.physics.add.group({
+            allowGravity: true,
+        });
+        this.physics.add.collider(this.hongos, this.cespedColision);
+        this.physics.add.collider(this.hongos, this.bloqueMisterioso);
+        this.physics.add.collider(this.hongos, this.bloqueNormal);
+        this.physics.add.collider(this.hongos, this.bloquesInmoviles);
+        this.physics.add.collider(this.hongos, this.bloquesVacios);
+        this.physics.add.collider(this.hongos, this.tubos);
+
+        //bloque vacio
+        this.bloquesVacios = this.physics.add.staticGroup();
+        this.physics.add.collider(this.personaje, this.bloquesVacios);
+
         // Crear los cursores
         this.keys = this.input.keyboard.createCursorKeys();
 
     }
 
     update() {
-
-        // No permitir movimiento si el personaje está muerto
+        // No permitir movimiento si está muerto
         if (this.personaje.isDead) return;
-    
-        // Aceleración a la derecha
+
+        // Movimiento horizontal
         if (this.keys.right.isDown) {
-            this.velocidadActual += this.aceleracion;
-            if (this.velocidadActual > this.velocidadMaxima) {
-                this.velocidadActual = this.velocidadMaxima;
-            }
+            this.velocidadActual = Math.min(this.velocidadActual + this.aceleracion, this.velocidadMaxima);
             this.personaje.setVelocityX(this.velocidadActual);
             this.personaje.flipX = false;
-    
-            // ANIMACIÓN DE CAMINAR A LA DERECHA
-            if (this.personaje.body.touching.down) {
-                this.personaje.anims.play("personaje-camina", true);
-            }
-        }
-        // Aceleración a la izquierda
-        else if (this.keys.left.isDown) {
-            this.velocidadActual -= this.aceleracion;
-            if (this.velocidadActual < -this.velocidadMaxima) {
-                this.velocidadActual = -this.velocidadMaxima;
-            }
+        } else if (this.keys.left.isDown) {
+            this.velocidadActual = Math.max(this.velocidadActual - this.aceleracion, -this.velocidadMaxima);
             this.personaje.setVelocityX(this.velocidadActual);
             this.personaje.flipX = true;
-    
-            // ANIMACIÓN DE CAMINAR A LA IZQUIERDA
-            if (this.personaje.body.touching.down) {
+        } else {
+            if (this.velocidadActual > 0) {
+                this.velocidadActual = Math.max(this.velocidadActual - this.frenado, 0);
+            } else if (this.velocidadActual < 0) {
+                this.velocidadActual = Math.min(this.velocidadActual + this.frenado, 0);
+            }
+            this.personaje.setVelocityX(this.velocidadActual);
+        }
+
+        // Animación de caminar o quieto (solo si está en el suelo)
+        if (this.personaje.body.touching.down) {
+            if (this.velocidadActual !== 0) {
                 this.personaje.anims.play("personaje-camina", true);
+            } else {
+                this.personaje.anims.stop();
+                this.personaje.setTexture("personaje", 0);
             }
         }
-        // Cuando no se presiona ninguna tecla
-        else {
-            if (this.velocidadActual > 0) {
-                this.velocidadActual -= this.frenado;
-                if (this.velocidadActual < 0) this.velocidadActual = 0;
-            } else if (this.velocidadActual < 0) {
-                this.velocidadActual += this.frenado;
-                if (this.velocidadActual > 0) this.velocidadActual = 0;
-            }
-    
-            this.personaje.setVelocityX(this.velocidadActual);
-        // Animación de quieto SOLO si está tocando el suelo
-        if (this.personaje.body.touching.down && this.velocidadActual === 0) {
-            this.personaje.anims.stop();
-            this.personaje.setTexture("personaje", 0); // Frame 0 = personaje quieto
-             }
-         }
-    
-         if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
-            this.personaje.setVelocityY(-300); // impulso inicial
+
+        // Salto
+        if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
+            this.personaje.setVelocityY(-300);
             this.personaje.anims.play("personaje-salta", true);
             this.estaSaltando = true;
             this.tiempoSalto = 0;
-        }
-        // Mantener el salto más alto mientras se mantiene la tecla
-        else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
-            this.personaje.setVelocityY(this.personaje.body.velocity.y - 15); // impulso extra
+        } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
+            this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
             this.tiempoSalto++;
             this.personaje.anims.play("personaje-salta", true);
         }
-        // Cuando se suelta la tecla o se supera el tiempo
+
+        // Soltar salto
         if (this.keys.up.isUp) {
             this.estaSaltando = false;
         }
-        
-        // Si está en el aire y no está saltando (por caída, por ejemplo)
+
+        // Animación en el aire (por caída)
         if (!this.personaje.body.touching.down && !this.estaSaltando) {
             this.personaje.anims.play("personaje-salta", true);
         }
-    
+
         // Detectar muerte por caída
         if (this.personaje.y > 230) {
             this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);
-            this.personaje.setVelocity(0, 0);
-            this.personaje.setVelocityY(-400);
-    
+            this.personaje.setVelocity(0, -400);
+
             this.time.delayedCall(2000, () => {
                 this.scene.restart();
             });
         }
-    
-        if (!this.goombaActiva) {
-            const primerGoomba = this.goombas.getFirstAlive();
-            if (primerGoomba && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, primerGoomba.x, primerGoomba.y) < 100) {
-                this.goombas.children.iterate(goomba => {
-                    if (goomba) {
-                        goomba.setVelocityX(-35);
-                        goomba.anims.play("goomba-camina", true);
-                    }
-                });
-                this.goombaActiva = true;
+
+        // Activar goombas
+        this.goombas.children.iterate(goomba => {
+            if (!goomba.activado && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, goomba.x, goomba.y) < 200) {
+                if (goomba.anims.getName() !== "goomba-muerte") {
+                    goomba.setVelocityX(-35);
+                    goomba.anims.play("goomba-camina", true);
+                    goomba.activado = true;
+                }
             }
-        }
+        });
+
+        // Activar koopa
         if (!this.koopaActiva) {
-            if (this.koopa && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.koopa.x, this.koopa.y) < 50) {
+            const distancia = Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.koopa.x, this.koopa.y);
+            if (distancia < 200 && this.koopa.anims.getName() !== "koopa-muerte") {
                 this.koopa.setVelocityX(-35);
                 this.koopa.anims.play("koopa-caminar", true);
                 this.koopaActiva = true;
             }
         }
     }
-    
 
     colisionEnemigoGoomba(personaje, goombas) {
         if (personaje.body.touching.down && goombas.body.touching.up) {
@@ -410,65 +452,114 @@ export class Game extends Scene
             });
         }
 
+
         hitKoopa = (personaje, koopa) => {
             if (personaje.body.velocity.y > 0) {
-                // Si Mario está cayendo sobre el Koopa (detectamos colisión desde arriba)
-                koopa.destroy(); // Koopa muere
-                personaje.setVelocityY(-350); // Rebote del personaje al caer sobre el Koopa
+                koopa.destroy();
+                personaje.setVelocityY(-350);
         
-                // Crear el caparazón en la posición del Koopa
-                this.caparazon = this.physics.add.sprite(koopa.x, koopa.y, 'Caparazon');
-                this.caparazon.setCollideWorldBounds(true);
-                this.caparazon.body.setVelocityX(0); // El caparazón no se mueve inmediatamente
+                // Crear caparazón
+                this.caparazon = this.physics.add.sprite(koopa.x, koopa.y, 'Caparazon').setCollideWorldBounds(true);
+                this.caparazon.body.setVelocityX(0);
+                this.caparazon.moverCaparazon = false;
         
-                // Agregar las colisiones
+                // Colisiones del caparazón
                 this.physics.add.collider(this.caparazon, this.cespedColision);
                 this.physics.add.collider(this.caparazon, this.tubos, this.rebotarGoomba, null, this);
                 this.physics.add.collider(this.personaje, this.caparazon, this.colisionCaparazon, null, this);
                 this.physics.add.collider(this.caparazon, this.muroColision, this.destruirCaparazon, null, this);
                 this.physics.add.collider(this.caparazon, this.goombas, this.caparazonMataGoomba, null, this);
-                // Establecer un flag para rastrear si el caparazón debe moverse
-                this.caparazon.moverCaparazon = false; // Inicialmente no debe moverse
+        
             } else {
-                // Si el personaje no está cayendo, se ejecuta la lógica de muerte del personaje
                 this.morirPersonaje();
-                koopa.setVelocityX(0);
-                koopa.disableBody(true, true); // Deshabilitar las colisiones temporalmente
-                this.time.delayedCall(1, () => { // Vuelve a habilitar las colisiones después de 500ms
-                    koopa.enableBody(false, 0, 0, true, true);
+                koopa.setVelocityX(0).disableBody(true, true);
+                this.time.delayedCall(1, () => koopa.enableBody(false, 0, 0, true, true));
+            }
+        }
+        
+        colisionCaparazon = () => {
+            if (!this.caparazon) return;
+        
+            if (this.caparazon.body.velocity.x === 0 && !this.caparazon.moverCaparazon) {
+                this.caparazon.moverCaparazon = true;
+            }
+        
+            if (this.caparazon.moverCaparazon) {
+                this.caparazon.body.setVelocityX(200);
+            }
+        }
+        
+        destruirCaparazon = (caparazon) => {
+            caparazon.destroy();
+        }
+        
+        caparazonMataGoomba = (caparazon, goomba) => {
+            goomba.body.setVelocityY(-200);
+            caparazon.body.setVelocityX(200);
+            this.time.delayedCall(200, () => goomba.destroy());
+        }
+        
+        hacerSaltarBloque = function(bloque) {
+            if (!bloque.recolectado) {
+                this.tweens.add({
+                    targets: bloque,
+                    y: bloque.originalY - 16,
+                    duration: 300,
+                    ease: 'Power1',
+                    onComplete: () => {
+                        bloque.recolectado = true;
+        
+                        // Si es de los que deben spawnear hongo
+                        if (bloque === this.bloqueMisterioso2 || bloque === this.bloqueMisterioso5 || bloque === this.bloqueMisterioso9) {
+                            const hongo = this.hongos.create(bloque.x, bloque.y - 1, "Hongo").setScale(0.5).setBounce(1, 0) ;
+                            
+                            this.tweens.add({
+                                targets: hongo,
+                                y: hongo.y - 2,
+                                duration: 100,
+                                ease: 'Power1',
+                                onComplete: () => {
+                                    hongo.body.setVelocityX(80); // Hacia la derecha
+                                }
+                            });
+        
+                            // Colisión personaje-hongo
+                            this.physics.add.collider(this.personaje, hongo, (personaje, objeto) => {
+                                objeto.destroy();
+                                console.log("¡Hongo recolectado!");
+                            });
+        
+                            // Rebotes hongo con otros objetos
+                            this.physics.add.collider(hongo, this.tubos, () => {
+                                hongo.body.setVelocityX(-hongo.body.velocity.x); // Cambia dirección
+                            });
+                            this.physics.add.collider(hongo, this.bloquesInmoviles, () => {
+                                hongo.body.setVelocityX(-hongo.body.velocity.x);
+                            });
+                            this.physics.add.collider(hongo, this.bloqueNormal, () => {
+                                hongo.body.setVelocityX(-hongo.body.velocity.x);
+                            });
+                            this.physics.add.collider(hongo, this.bloqueMisterioso, () => {
+                                hongo.body.setVelocityX(-hongo.body.velocity.x);
+                            });
+                        }
+        
+                        // Vuelve bloque a su posición
+                        this.tweens.add({
+                            targets: bloque,
+                            y: bloque.originalY,
+                            duration: 300,
+                            ease: 'Power1',
+                            onComplete: () => {
+                                // Cambiar bloque por bloqueVacio
+                                bloque.destroy();
+                                const bloqueVacio = this.physics.add.staticSprite(bloque.x, bloque.originalY, 'bloqueVacio');
+                                this.physics.add.collider(this.personaje, bloqueVacio);
+                            }
+                        });
+                    }
                 });
             }
-        }
+        };
         
-        colisionCaparazon() {
-            // Verificar si Mario ha tocado el caparazón
-            if (this.caparazon && this.caparazon.body.velocity.x === 0) {
-                // La primera vez que el personaje toca el caparazón, activamos el flag
-                if (!this.caparazon.moverCaparazon) {
-                    this.caparazon.moverCaparazon = true; // Activamos que el caparazón se mueva
-                }
-            }
-        
-            // Si el flag está activado, movemos el caparazón hacia la derecha
-            if (this.caparazon && this.caparazon.moverCaparazon) {
-                this.caparazon.body.setVelocityX(200);  // El caparazón se mueve hacia la derecha
-            }
-        }
-        
-        destruirCaparazon(caparazon, muroColision) {
-            caparazon.destroy();  // Destruye el caparazón cuando choca con bloqueinmovil1
-        }
-
-        caparazonMataGoomba(caparazon, goombas) {
-            // Hacer que el Goomba pegue un salto
-            goombas.body.setVelocityY(-200);
-            
-            // Mantener la velocidad del caparazón sin frenar
-            caparazon.body.setVelocityX(200);  // Asegúrate de que el caparazón siga moviéndose a la derecha
-        
-            // Añadir un pequeño retraso para que se vea el salto antes de destruir
-            this.time.delayedCall(200, () => {
-                goombas.destroy();  // Destruir el Goomba después de saltar
-            });
-        }   
-    }        
+}

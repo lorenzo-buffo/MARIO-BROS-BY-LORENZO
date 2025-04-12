@@ -40,6 +40,14 @@ export class Preloader extends Scene
         this.load.image("bloqueInmovil", "bloqueInmovil.png")
         this.load.image("castillo", "castillo.png")
         this.load.image("bandera", "bandera.png")
+        this.load.image("MontañaGrande", "mountain2.png")
+        this.load.image("MontañaChica", "mountain1.png")
+        this.load.image("ArbustoGrande", "arbusto1.png")
+        this.load.image("ArbustoChico", "arbusto2.png")
+        this.load.image("ArbustoMediano", "arbusto3.png")
+        this.load.image("NubeGrande", "nube3.png")
+        this.load.image("NubeChica", "nube2.png")
+        this.load.image("NubeMediana", "nube1.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});

@@ -8,6 +8,8 @@ export class Game extends Scene
 
     create ()
     {
+        this.add.image(2790, 186, "MontañaGrande").setScale(0.7)
+        this.add.image(2645, 200, "ArbustoMediano").setScale(0.7)
         // Crear TILES SPRITES  
         this.cesped1 = this.add.tileSprite(0, 244, 2496, 64, "cesped");
         this.cesped2 = this.add.tileSprite(1480, 244, 304, 64, "cesped");
@@ -63,7 +65,7 @@ export class Game extends Scene
         this.cespedColision.create(2958, 156, null).setSize(16, 16).setVisible(false);
         
         let anchoBloque = 144; // 9 bloques de 16px = 144
-        let posicionX = 3502;
+        let posicionX = 3490;
         let posicionY = 204;
 
         for (let i = 1; anchoBloque >= 16; i++) {
@@ -82,18 +84,69 @@ export class Game extends Scene
         }
 
          //crear castillo
-         this.add.image(3800, 137, "castillo");
+         this.add.image(3820, 152, "castillo").setScale(0.8)
+         //MONTAÑA ANTES DE BANDERA 
+         this.add.image(3630, 186, "MontañaGrande").setScale(0.7)
+         
          //crear bandera
-         this.add.image(3678,128, "bandera");
+         this.add.image(3700,128, "bandera");
+
+         //montañas grandes
+         this.add.image(20, 186, "MontañaGrande").setScale(0.7)
+         this.add.image(955, 186, "MontañaGrande").setScale(0.7)
+         this.add.image(1870, 186, "MontañaGrande").setScale(0.7)
+         //montaña chica
+         this.add.image(360, 196, "MontañaChica").setScale(0.8)
+         this.add.image(1200, 196, "MontañaChica").setScale(0.8)
+         this.add.image(2200, 196, "MontañaChica").setScale(0.8)
+         this.add.image(3060, 196, "MontañaChica").setScale(0.8)
+         
+         //ARBUSTO GRANDE
+         this.add.image(270, 200, "ArbustoGrande").setScale(0.7)
+         this.add.image(2112, 200, "ArbustoGrande").setScale(0.7)
+         //arbusto chico
+         this.add.image(480, 200, "ArbustoChico").setScale(0.7)
+         this.add.image(1370, 200, "ArbustoChico").setScale(0.7)
+         this.add.image(2340, 200, "ArbustoChico").setScale(0.7)
+         this.add.image(3210, 200, "ArbustoChico").setScale(0.7)
+         //arbusto mediano
+         this.add.image(800, 200, "ArbustoMediano").setScale(0.7)
+         this.add.image(1127, 200, "ArbustoMediano").setScale(0.7)
+         this.add.image(1745, 200, "ArbustoMediano").setScale(0.7)
+
+         //nube chica
+         this.add.image(130, 50, "NubeChica").setScale(0.2)
+         this.add.image(380, 30, "NubeChica").setScale(0.2)
+         this.add.image(1060, 50, "NubeChica").setScale(0.2)
+         this.add.image(1250, 30, "NubeChica").setScale(0.2)
+         this.add.image(2050, 50, "NubeChica").setScale(0.2)
+         this.add.image(2260, 30, "NubeChica").setScale(0.2)
+         this.add.image(2900, 50, "NubeChica").setScale(0.2)
+         this.add.image(3150, 30, "NubeChica").setScale(0.2)
+         this.add.image(3750, 50, "NubeChica").setScale(0.2)
+         //nube grande
+         this.add.image(590, 50, "NubeGrande").setScale(0.8)
+         this.add.image(1470, 50, "NubeGrande").setScale(0.8)
+         this.add.image(2410, 50, "NubeGrande").setScale(0.8)
+         this.add.image(3330, 50, "NubeGrande").setScale(0.8)
+         //nube mediana
+         this.add.image(740, 30, "NubeMediana").setScale(0.2)
+         this.add.image(1650, 30, "NubeMediana").setScale(0.2)
+         this.add.image(2570, 30, "NubeMediana").setScale(0.2)
+         this.add.image(3480, 30, "NubeMediana").setScale(0.2)
+         
+         
+      
+       
 
         // Crear el personaje
-        this.personaje = this.physics.add.sprite(100, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
+        this.personaje = this.physics.add.sprite(10, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
         this.personaje.setCollideWorldBounds(true);
         this.personaje.isDead = false;
         this.velocidadActual = 0;
-        this.velocidadMaxima = 160;
-        this.aceleracion = 10;
-        this.frenado = 20;
+        this.velocidadMaxima = 150;
+        this.aceleracion = 3;
+        this.frenado = 30;
         this.estaSaltando = false;
         this.tiempoSalto = 0;
 
@@ -126,6 +179,7 @@ export class Game extends Scene
         this.bloqueMisterioso.create(2488, 80, "bloqueMisterioso").play('bloqueMisteriosoAnim');
         this.bloqueMisterioso.create(3232, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
         this.physics.add.collider(this.personaje, this.bloqueMisterioso);
+       
 
         //crear bloque noermal
         this.bloqueNormal = this.physics.add.staticGroup();
@@ -154,11 +208,10 @@ export class Game extends Scene
         this.bloqueNormal.create(3216, 150, "bloqueNormal");
         this.bloqueNormal.create(3248, 150, "bloqueNormal");
         this.physics.add.collider(this.personaje, this.bloqueNormal);
-
+    
         // Crear un grupo único para todos los tubos
         this.tubos = this.physics.add.staticGroup();
-        // Crear tubos cortos
-        this.tubos.create(545, 196, "tuboCorto")
+        this.tubos.create(560, 196, "tuboCorto")
         this.tubos.create(3110, 196, "tuboCorto")
         this.tubos.create(3400, 196, "tuboCorto")
 
@@ -167,18 +220,20 @@ export class Game extends Scene
 
         // Crear tubos largos
         this.tubos.create(880, 180, "tuboLargo")
-        this.tubos.create(1080, 180, "tuboLargo")
+        this.tubos.create(1070, 180, "tuboLargo")
 
         // Colisión entre el personaje y los tubos
         this.physics.add.collider(this.personaje, this.tubos);
 
         this.goombas = this.physics.add.group();
-        this.goombas.create(450, 208, 'goomba');
-
+        this.physics.add.collider(this.goombas, this.bloqueNormal);
+        this.physics.add.collider(this.goombas, this.bloqueMisterioso);
+        // Crear tubos cortos
+        this.goombas.create(420, 208, 'goomba');
         // Goombas adicionales
         this.goombas.create(750, 208, 'goomba');
         this.goombas.create(900, 208, 'goomba');
-        this.goombas.create(920, 208, 'goomba');
+        this.goombas.create(950, 208, 'goomba');
         this.goombas.create(2180, 208, 'goomba');
         this.goombas.create(2200, 208, 'goomba');
         this.goombas.create(2450, 208, 'goomba');
@@ -187,8 +242,7 @@ export class Game extends Scene
         this.goombas.create(2620, 208, 'goomba');
         this.goombas.create(3250, 208, 'goomba');
         this.goombas.create(3300, 208, 'goomba');
-      
-
+        this.goombas.create(1680, 60, 'goomba');
 
         this.physics.add.collider(this.goombas, this.cespedColision);
         this.physics.add.collider(this.goombas, this.tubos, this.rebotarGoomba, null, this);
@@ -257,8 +311,8 @@ export class Game extends Scene
             this.tiempoSalto = 0;
         }
         // Mantener el salto más alto mientras se mantiene la tecla
-        else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 15) {
-            this.personaje.setVelocityY(this.personaje.body.velocity.y - 18); // impulso extra
+        else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
+            this.personaje.setVelocityY(this.personaje.body.velocity.y - 15); // impulso extra
             this.tiempoSalto++;
             this.personaje.anims.play("personaje-salta", true);
         }
@@ -286,7 +340,7 @@ export class Game extends Scene
     
         if (!this.goombaActiva) {
             const primerGoomba = this.goombas.getFirstAlive();
-            if (primerGoomba && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, primerGoomba.x, primerGoomba.y) < 200) {
+            if (primerGoomba && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, primerGoomba.x, primerGoomba.y) < 100) {
                 this.goombas.children.iterate(goomba => {
                     if (goomba) {
                         goomba.setVelocityX(-35);

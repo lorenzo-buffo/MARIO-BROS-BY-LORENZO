@@ -33,7 +33,9 @@ export class Game extends Scene
         this.bloqueInmovil14 = this.add.tileSprite(2966, 172, 32, 16, "bloqueInmovil");
         this.bloqueInmovil14 = this.add.tileSprite(2958, 156, 16, 16, "bloqueInmovil");
         
-        
+        //colision especial
+        this.muroColision = this.physics.add.staticGroup();
+        this.muroColision.create(2588, 204, null).setSize(64, 16).setVisible(false);
         // Crear grupo estático de colisiones
         this.cespedColision = this.physics.add.staticGroup();
         //colision suelo 1
@@ -47,7 +49,6 @@ export class Game extends Scene
         //colision bloque largo
         this.cespedColision.create(1600, 80, null).setSize(152, 16).setVisible(false);
         //colision bloques inmoviles
-        this.cespedColision.create(2588, 204, null).setSize(64, 16).setVisible(false);
         this.cespedColision.create(2596, 188, null).setSize(48, 16).setVisible(false);
         this.cespedColision.create(2604, 172, null).setSize(32, 16).setVisible(false);
         this.cespedColision.create(2612, 155, null).setSize(16, 16).setVisible(false);
@@ -136,11 +137,8 @@ export class Game extends Scene
          this.add.image(3480, 30, "NubeMediana").setScale(0.2)
          
          
-      
-       
-
         // Crear el personaje
-        this.personaje = this.physics.add.sprite(10, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
+        this.personaje = this.physics.add.sprite(2200, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
         this.personaje.setCollideWorldBounds(true);
         this.personaje.isDead = false;
         this.velocidadActual = 0;
@@ -153,6 +151,7 @@ export class Game extends Scene
   
         // Colisión entre el personaje y el césped
         this.physics.add.collider(this.personaje, this.cespedColision);
+        this.physics.add.collider(this.personaje, this.muroColision);
 
         // Límites del mundo
         this.physics.world.setBounds(0, 0, 3900, 244);
@@ -228,9 +227,8 @@ export class Game extends Scene
         this.goombas = this.physics.add.group();
         this.physics.add.collider(this.goombas, this.bloqueNormal);
         this.physics.add.collider(this.goombas, this.bloqueMisterioso);
-        // Crear tubos cortos
+        //crear goombas
         this.goombas.create(420, 208, 'goomba');
-        // Goombas adicionales
         this.goombas.create(750, 208, 'goomba');
         this.goombas.create(900, 208, 'goomba');
         this.goombas.create(950, 208, 'goomba');
@@ -249,8 +247,20 @@ export class Game extends Scene
         this.physics.add.collider(this.personaje, this.goombas, this.colisionEnemigoGoomba, null, this);
         this.goombaActiva = false; 
 
+        // Crear al Koopa
+        this.koopa = this.physics.add.sprite(2300, 208, 'koopa');
+        // Hacer que Koopa se mueva
+        this.koopa.setVelocityX(-30);
+        this.koopa.anims.play('koopa-camina', true);
+        this.koopa.setCollideWorldBounds(true);
+        this.physics.add.collider(this.koopa, this.cespedColision);
+        // Colisión entre jugador y Koopa
+        this.physics.add.overlap(this.personaje, this.koopa, this.hitKoopa, null, this);
+        this.koopaActiva = false; 
+        
         // Crear los cursores
         this.keys = this.input.keyboard.createCursorKeys();
+
     }
 
     update() {
@@ -350,6 +360,13 @@ export class Game extends Scene
                 this.goombaActiva = true;
             }
         }
+        if (!this.koopaActiva) {
+            if (this.koopa && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.koopa.x, this.koopa.y) < 50) {
+                this.koopa.setVelocityX(-35);
+                this.koopa.anims.play("koopa-caminar", true);
+                this.koopaActiva = true;
+            }
+        }
     }
     
 
@@ -392,4 +409,66 @@ export class Game extends Scene
                 this.scene.restart();
             });
         }
-    }
+
+        hitKoopa = (personaje, koopa) => {
+            if (personaje.body.velocity.y > 0) {
+                // Si Mario está cayendo sobre el Koopa (detectamos colisión desde arriba)
+                koopa.destroy(); // Koopa muere
+                personaje.setVelocityY(-350); // Rebote del personaje al caer sobre el Koopa
+        
+                // Crear el caparazón en la posición del Koopa
+                this.caparazon = this.physics.add.sprite(koopa.x, koopa.y, 'Caparazon');
+                this.caparazon.setCollideWorldBounds(true);
+                this.caparazon.body.setVelocityX(0); // El caparazón no se mueve inmediatamente
+        
+                // Agregar las colisiones
+                this.physics.add.collider(this.caparazon, this.cespedColision);
+                this.physics.add.collider(this.caparazon, this.tubos, this.rebotarGoomba, null, this);
+                this.physics.add.collider(this.personaje, this.caparazon, this.colisionCaparazon, null, this);
+                this.physics.add.collider(this.caparazon, this.muroColision, this.destruirCaparazon, null, this);
+                this.physics.add.collider(this.caparazon, this.goombas, this.caparazonMataGoomba, null, this);
+                // Establecer un flag para rastrear si el caparazón debe moverse
+                this.caparazon.moverCaparazon = false; // Inicialmente no debe moverse
+            } else {
+                // Si el personaje no está cayendo, se ejecuta la lógica de muerte del personaje
+                this.morirPersonaje();
+                koopa.setVelocityX(0);
+                koopa.disableBody(true, true); // Deshabilitar las colisiones temporalmente
+                this.time.delayedCall(1, () => { // Vuelve a habilitar las colisiones después de 500ms
+                    koopa.enableBody(false, 0, 0, true, true);
+                });
+            }
+        }
+        
+        colisionCaparazon() {
+            // Verificar si Mario ha tocado el caparazón
+            if (this.caparazon && this.caparazon.body.velocity.x === 0) {
+                // La primera vez que el personaje toca el caparazón, activamos el flag
+                if (!this.caparazon.moverCaparazon) {
+                    this.caparazon.moverCaparazon = true; // Activamos que el caparazón se mueva
+                }
+            }
+        
+            // Si el flag está activado, movemos el caparazón hacia la derecha
+            if (this.caparazon && this.caparazon.moverCaparazon) {
+                this.caparazon.body.setVelocityX(200);  // El caparazón se mueve hacia la derecha
+            }
+        }
+        
+        destruirCaparazon(caparazon, muroColision) {
+            caparazon.destroy();  // Destruye el caparazón cuando choca con bloqueinmovil1
+        }
+
+        caparazonMataGoomba(caparazon, goombas) {
+            // Hacer que el Goomba pegue un salto
+            goombas.body.setVelocityY(-200);
+            
+            // Mantener la velocidad del caparazón sin frenar
+            caparazon.body.setVelocityX(200);  // Asegúrate de que el caparazón siga moviéndose a la derecha
+        
+            // Añadir un pequeño retraso para que se vea el salto antes de destruir
+            this.time.delayedCall(200, () => {
+                goombas.destroy();  // Destruir el Goomba después de saltar
+            });
+        }   
+    }        

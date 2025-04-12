@@ -48,9 +48,11 @@ export class Preloader extends Scene
         this.load.image("NubeGrande", "nube3.png")
         this.load.image("NubeChica", "nube2.png")
         this.load.image("NubeMediana", "nube1.png")
+        this.load.image("Caparazon", "caparazon.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet("koopa", "koopa.png" , { frameWidth: 16, frameHeight: 16 });
     }
 
     create ()
@@ -97,6 +99,14 @@ export class Preloader extends Scene
         this.anims.create({
             key: 'goomba-camina',
             frames: this.anims.generateFrameNumbers('goomba', { start: 0, end: 1}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
+
+        //agregar animacion de koopa
+        this.anims.create({
+            key: 'koopa-camina',
+            frames: this.anims.generateFrameNumbers('koopa', { start: 0, end: 1}), 
             frameRate: 12, 
             repeat: -1 
         });

@@ -173,15 +173,25 @@ export class Game extends Scene
         this.physics.add.collider(this.personaje, this.tubos);
 
         this.goombas = this.physics.add.group();
-    this.goombas.create(120, 208, 'goomba');
+        this.goombas.create(450, 208, 'goomba');
 
-    // Goombas adicionales
-    this.goombas.create(160, 208, 'goomba');
-    this.goombas.create(200, 208, 'goomba');
-    this.goombas.create(240, 208, 'goomba');
+        // Goombas adicionales
+        this.goombas.create(750, 208, 'goomba');
+        this.goombas.create(900, 208, 'goomba');
+        this.goombas.create(920, 208, 'goomba');
+        this.goombas.create(2180, 208, 'goomba');
+        this.goombas.create(2200, 208, 'goomba');
+        this.goombas.create(2450, 208, 'goomba');
+        this.goombas.create(2500, 208, 'goomba');
+        this.goombas.create(2580, 208, 'goomba');
+        this.goombas.create(2620, 208, 'goomba');
+        this.goombas.create(3250, 208, 'goomba');
+        this.goombas.create(3300, 208, 'goomba');
+      
+
 
         this.physics.add.collider(this.goombas, this.cespedColision);
-        this.physics.add.collider(this.goombas, this.tubos);
+        this.physics.add.collider(this.goombas, this.tubos, this.rebotarGoomba, null, this);
         this.physics.add.collider(this.personaje, this.goombas, this.colisionEnemigoGoomba, null, this);
         this.goombaActiva = false; 
 
@@ -248,7 +258,7 @@ export class Game extends Scene
         }
         // Mantener el salto más alto mientras se mantiene la tecla
         else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 15) {
-            this.personaje.setVelocityY(this.personaje.body.velocity.y - 20); // impulso extra
+            this.personaje.setVelocityY(this.personaje.body.velocity.y - 18); // impulso extra
             this.tiempoSalto++;
             this.personaje.anims.play("personaje-salta", true);
         }
@@ -276,7 +286,7 @@ export class Game extends Scene
     
         if (!this.goombaActiva) {
             const primerGoomba = this.goombas.getFirstAlive();
-            if (primerGoomba && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, primerGoomba.x, primerGoomba.y) < 500) {
+            if (primerGoomba && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, primerGoomba.x, primerGoomba.y) < 200) {
                 this.goombas.children.iterate(goomba => {
                     if (goomba) {
                         goomba.setVelocityX(-35);
@@ -307,6 +317,16 @@ export class Game extends Scene
         }
     }    
 
+    rebotarGoomba(goomba, objeto) {
+        if (goomba.body.blocked.left || goomba.body.touching.left) {
+            goomba.setVelocityX(40); // Cambia a derecha
+            goomba.flipX = false;
+        } else if (goomba.body.blocked.right || goomba.body.touching.right) {
+            goomba.setVelocityX(-40); // Cambia a izquierda
+            goomba.flipX = true;
+        }
+    }
+    
     morirPersonaje(game){
         this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);

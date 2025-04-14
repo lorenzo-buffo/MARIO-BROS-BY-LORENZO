@@ -12,6 +12,7 @@ export class Game extends Scene {
     if (this.registry.get('vidas') === undefined) {
         this.registry.set('vidas', 3);
     }
+    this.posicionCastillo = 3820;
 }
     
 
@@ -326,7 +327,7 @@ export class Game extends Scene {
         this.koopa.setVelocityX(0);  // Quieto al principio.
         this.koopa.setCollideWorldBounds(true);
         this.physics.add.collider(this.koopa, this.cespedColision);
-        this.physics.add.overlap(this.personaje, this.koopa, this.hitKoopa, null, this);
+        this.physics.add.collider(this.personaje, this.koopa, this.hitKoopa, null, this);
         this.koopaActiva = false;
         
         //crear hongo
@@ -518,6 +519,9 @@ export class Game extends Scene {
                 this.koopaActiva = true;
             }
         }
+        if (this.personaje.x >= this.posicionCastillo) {
+            this.scene.start('MainMenu');
+        }
     }
     
     colisionEnemigoGoomba(personaje, goombas) {
@@ -605,7 +609,7 @@ export class Game extends Scene {
             this.time.delayedCall(500, () => {
                 koopa.destroy();
                 this.sumarPuntos(150);  // Sumar 150 puntos
-    
+            
                 // Crear texto flotante
                 let textoFlotante = this.add.text(koopa.x, koopa.y, '150', {
                     font: '16px Arial',
@@ -613,7 +617,7 @@ export class Game extends Scene {
                     stroke: '#000000',
                     strokeThickness: 2
                 });
-    
+            
                 // Animar el texto flotante para que suba
                 this.tweens.add({
                     targets: textoFlotante,
@@ -666,17 +670,22 @@ export class Game extends Scene {
             koopa.destroy();  // Destruir inmediatamente
         }
         else {
-            if (personaje.powerUp) {
-                personaje.powerUp = false;
-                personaje.body.setSize(16, 16).setOffset(0, 0);
-                personaje.anims.play('personaje-camina', true);
-                console.log("El personaje perdió el poder del hongo");
-                this.pausarEnemigos();
-            } else {
-                this.morirPersonaje(personaje);
+            // Tocado de costado
+            if (!(personaje.body.touching.down && koopa.body.touching.up)) {
+                if (personaje.powerUp) {
+                    personaje.powerUp = false;
+                    personaje.body.setSize(16, 16).setOffset(0, 0);
+                    personaje.anims.play('personaje-camina', true);
+                    console.log("El personaje perdió el poder del hongo");
+                    this.pausarEnemigos();
+                } else {
+                    this.morirPersonaje(personaje);
+                }
             }
         }
     }
+    
+    
     
     
     rebotarGoomba(goomba, objeto) {

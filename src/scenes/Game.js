@@ -8,7 +8,12 @@ export class Game extends Scene {
     init() {
         this.puntos = 0;
         this.tiempoRestante = 180;
+        // Solo establecer vidas en 3 si no existen aún
+    if (this.registry.get('vidas') === undefined) {
+        this.registry.set('vidas', 3);
     }
+}
+    
 
     create() {
         // Imágenes de fondo
@@ -232,8 +237,6 @@ export class Game extends Scene {
             }
         });
         
-        
-
 
         // Crear bloque normal
         this.bloqueNormal = this.physics.add.staticGroup();
@@ -359,16 +362,16 @@ export class Game extends Scene {
         this.keys = this.input.keyboard.createCursorKeys();
         
         // texto y puntos
-        this.textoPuntos = this.add.text(20, 10, 'Puntos: 0', {
-            font: '15px Arial',
+        this.textoPuntos = this.add.text(10, 10, 'Puntos: 0', {
+            font: '14px Arial',
             fill: '#ffffff',
             stroke: '#000000',         // Color del borde (negro)
             strokeThickness: 2         // Grosor del borde
         });
         this.textoPuntos.setScrollFactor(0);
 
-        this.textoTemporizador = this.add.text(150, 10, 'Tiempo: 3:00', {
-            font: '15px Arial',
+        this.textoTemporizador = this.add.text(170, 10, 'Tiempo: 3:00', {
+            font: '14px Arial',
             fill: '#ffffff',
             stroke: '#000000',
             strokeThickness: 2         // Grosor del borde
@@ -393,6 +396,16 @@ export class Game extends Scene {
             callbackScope: this,
             loop: true
         });
+
+           // Crear texto de vidas en pantalla, accediendo al valor correcto desde el registro
+    this.textoVidas = this.add.text(95, 10, 'Vidas: ' + this.registry.get('vidas'), {
+        font: '14px Arial',
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2
+    });
+    this.textoVidas.setScrollFactor(0);  // No hacer scroll con la cámara
+
     }
 
     update() {
@@ -416,7 +429,8 @@ export class Game extends Scene {
             }
             this.personaje.setVelocityX(this.velocidadActual);
         }
-            // Animación de caminar o quieto (solo si está en el suelo)
+    
+        // Animación de caminar o quieto (solo si está en el suelo)
         if (this.personaje.body.touching.down) {
             if (this.velocidadActual !== 0) {
                 if (this.personaje.powerUp) {
@@ -436,7 +450,7 @@ export class Game extends Scene {
                 }
             }                
         }
-
+    
         // Salto
         if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
             this.personaje.setVelocityY(-300);
@@ -471,17 +485,19 @@ export class Game extends Scene {
             }
         }
     
-        // Detectar muerte por caída
-        if (this.personaje.y > 230) {
-            this.personaje.isDead = true;
-            this.personaje.anims.play("personaje-muere", true);
-            this.personaje.setVelocity(0, -400);
+       // Detectar muerte por caída
+       if (this.personaje.y > 230) {
+        this.personaje.isDead = true;
+        this.personaje.anims.play("personaje-muere", true);
+        this.personaje.setVelocity(0, -400);
     
-            this.time.delayedCall(2000, () => {
-                this.scene.restart();
-            });
-        }
+        // Restar una vida cuando muere por caída
+        this.perderVida();  // Llamar a la función que resta vida
     
+        this.time.delayedCall(2000, () => {
+            this.scene.restart();  // Reiniciar la escena
+        });
+    }
         // Activar goombas
         this.goombas.children.iterate(goomba => {
             if (!goomba.activado && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, goomba.x, goomba.y) < 200) {
@@ -674,18 +690,36 @@ export class Game extends Scene {
     }
     
 
-    morirPersonaje() {
-        this.personaje.isDead = true;
-        this.personaje.anims.play("personaje-muere", true);
-        this.personaje.setVelocity(0, 0);
-        this.personaje.setVelocityY(-400);
-        this.pausarEnemigos();
+    morirPersonaje(personaje) {
+        personaje.isDead = true;
+        personaje.anims.play("personaje-muere", true);
     
-        this.time.delayedCall(2000, () => {
-            this.scene.restart();
-        });
+        // Desactivar las colisiones mientras dura la animación de muerte
+        personaje.body.checkCollision.none = true;
+        
+        // Detener el movimiento del personaje durante la muerte
+        personaje.setVelocity(0, -400);
+    
+        // Restar una vida
+        this.perderVida();
+    
+        // Verificar si es la última vida después de restar la vida
+        if (this.registry.get('vidas') <= 0) {
+            // Si es la última vida, después de la animación de muerte, se va a Game Over
+           
+                this.registry.set('vidas', 3); // Restablecer las 3 vidas
+                this.scene.start('GameOver'); // Iniciar la escena de Game Over
+            
+        } else {
+            // Si aún quedan vidas, reiniciar la escena
+            this.time.delayedCall(2000, () => {
+                personaje.body.checkCollision.none = false; // Reactivar las colisiones
+                this.scene.restart(); // Reiniciar la escena
+            });
+        }
     }
-
+    
+    
 
      pausarEnemigos() {
         this.goombas.getChildren().forEach(goomba => {
@@ -988,4 +1022,18 @@ export class Game extends Scene {
         // Actualizamos el texto
         this.textoPuntos.setText('Puntos: ' + this.puntos);
     }
-}    
+
+    perderVida() {
+        let vidas = this.registry.get('vidas');
+        vidas--; // Restar una vida
+        this.registry.set('vidas', vidas);
+        this.textoVidas.setText(`Vidas: ${vidas}`);
+    
+        if (vidas <= 0) {
+            // En lugar de reiniciar las vidas aquí, solo gestionamos la lógica de Game Over
+            // Ya no restamos vidas aquí si el jugador no tiene más.
+        }
+    }
+    
+}
+        

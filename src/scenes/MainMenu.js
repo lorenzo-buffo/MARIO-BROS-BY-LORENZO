@@ -13,8 +13,8 @@ export class MainMenu extends Scene
 
         this.add.image(512, 300, 'logo');
 
-        this.add.text(512, 460, 'Main Menu', {
-            fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',
+        this.add.text(120, 100, 'iniciar juego', {
+            fontFamily: 'Arial Black', fontSize: 20, color: '#ffffff',
             stroke: '#000000', strokeThickness: 8,
             align: 'center'
         }).setOrigin(0.5);

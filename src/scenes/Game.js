@@ -399,7 +399,7 @@ export class Game extends Scene {
         });
 
            // Crear texto de vidas en pantalla, accediendo al valor correcto desde el registro
-    this.textoVidas = this.add.text(95, 10, 'Vidas: ' + this.registry.get('vidas'), {
+    this.textoVidas = this.add.text(100, 10, 'Vidas: ' + this.registry.get('vidas'), {
         font: '14px Arial',
         fill: '#ffffff',
         stroke: '#000000',
@@ -454,7 +454,7 @@ export class Game extends Scene {
     
         // Salto
         if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
-            this.personaje.setVelocityY(-300);
+            this.personaje.setVelocityY(-350);
             if (this.personaje.powerUp) {
                 this.personaje.anims.play("PersonajeGrande-salta", true);
             } else {
@@ -529,12 +529,11 @@ export class Game extends Scene {
             // Salen volando y luego se destruyen
             goombas.setVelocityY(-500);
             goombas.setVelocityX(Phaser.Math.Between(-100, 100));  // Aleatorio para más estilo
-            goombas.body.checkCollision.none = true;  // Que no vuelva a chocar
+            goombas.body.checkCollision.none = true;
             this.time.delayedCall(500, () => {
                 goombas.destroy();
-                this.sumarPuntos(100);  // Sumar 100 puntos
+                this.sumarPuntos(100);
     
-                // Crear texto flotante
                 let textoFlotante = this.add.text(goombas.x, goombas.y, '100', {
                     font: '16px Arial',
                     fill: '#ffffff',
@@ -542,28 +541,23 @@ export class Game extends Scene {
                     strokeThickness: 2
                 });
     
-                // Animar el texto flotante para que suba
                 this.tweens.add({
                     targets: textoFlotante,
-                    y: goombas.y - 50,  // Mover 50 píxeles hacia arriba
-                    alpha: 0,            // Desvanecer
-                    duration: 1000,      // Duración de la animación
-                    ease: 'Power1',      // Tipo de animación
-                    onComplete: () => {
-                        textoFlotante.destroy(); // Destruir el texto flotante cuando termine la animación
-                    }
+                    y: goombas.y - 50,
+                    alpha: 0,
+                    duration: 1000,
+                    ease: 'Power1',
+                    onComplete: () => textoFlotante.destroy()
                 });
             });
         } 
         else if (personaje.body.touching.down && goombas.body.touching.up) {
-            // Matar al Goomba como siempre
             goombas.anims.play("goomba-muerte", true);
             goombas.setVelocityX(0);
             setTimeout(() => {
                 goombas.destroy();
-                this.sumarPuntos(100);  // Sumar 100 puntos
+                this.sumarPuntos(100);
     
-                // Crear texto flotante
                 let textoFlotante = this.add.text(goombas.x, goombas.y, '100', {
                     font: '16px Arial',
                     fill: '#ffffff',
@@ -571,116 +565,118 @@ export class Game extends Scene {
                     strokeThickness: 2
                 });
     
-                // Animar el texto flotante para que suba
                 this.tweens.add({
                     targets: textoFlotante,
-                    y: goombas.y - 50,  // Mover 50 píxeles hacia arriba
-                    alpha: 0,            // Desvanecer
-                    duration: 1000,      // Duración de la animación
-                    ease: 'Power1',      // Tipo de animación
-                    onComplete: () => {
-                        textoFlotante.destroy(); // Destruir el texto flotante cuando termine la animación
-                    }
+                    y: goombas.y - 50,
+                    alpha: 0,
+                    duration: 1000,
+                    ease: 'Power1',
+                    onComplete: () => textoFlotante.destroy()
                 });
             }, 300);
             personaje.setVelocityY(-350);
         } 
         else {
-            // Tocado de costado o por arriba
+            // Si es invulnerable por daño, no hacer nada
+            if (personaje.invulnerable) return;
+    
             if (personaje.powerUp) {
                 personaje.powerUp = false;
+                personaje.invulnerable = true;
                 personaje.body.setSize(16, 16).setOffset(0, 0);
                 personaje.anims.play('personaje-camina', true);
                 console.log("El personaje perdió el poder del hongo");
                 this.pausarEnemigos();
+    
+                // Recuperar estado normal después de 1 segundo
+                this.time.delayedCall(1000, () => {
+                    personaje.invulnerable = false;
+                });
+    
             } else {
                 this.morirPersonaje(personaje);
             }
         }
     }
     
+    
 
     hitKoopa = (personaje, koopa) => {
         if (personaje.invencible) {
-            // Salen volando y luego se destruyen
             koopa.setVelocityY(-500);
-            koopa.setVelocityX(Phaser.Math.Between(-100, 100));  // Movimiento aleatorio
+            koopa.setVelocityX(Phaser.Math.Between(-100, 100));
             koopa.body.checkCollision.none = true;
             this.time.delayedCall(500, () => {
                 koopa.destroy();
-                this.sumarPuntos(150);  // Sumar 150 puntos
-            
-                // Crear texto flotante
+                this.sumarPuntos(150);
+    
                 let textoFlotante = this.add.text(koopa.x, koopa.y, '150', {
                     font: '16px Arial',
                     fill: '#ffffff',
                     stroke: '#000000',
                     strokeThickness: 2
                 });
-            
-                // Animar el texto flotante para que suba
+    
                 this.tweens.add({
                     targets: textoFlotante,
-                    y: koopa.y - 50,  // Mover 50 píxeles hacia arriba
-                    alpha: 0,         // Desvanecer
+                    y: koopa.y - 50,
+                    alpha: 0,
                     duration: 1000,
                     ease: 'Power1',
-                    onComplete: () => {
-                        textoFlotante.destroy();
-                    }
+                    onComplete: () => textoFlotante.destroy()
                 });
             });
         } 
         else if (personaje.body.touching.down && koopa.body.touching.up) {
-            // Saltó encima del Koopa
-            this.sumarPuntos(150);  // Sumar 150 puntos antes de destruir
-        
-            // Crear texto flotante
+            this.sumarPuntos(150);
+    
             let textoFlotante = this.add.text(koopa.x, koopa.y, '150', {
                 font: '16px Arial',
                 fill: '#ffffff',
                 stroke: '#000000',
                 strokeThickness: 2
             });
-        
+    
             this.tweens.add({
                 targets: textoFlotante,
                 y: koopa.y - 50,
                 alpha: 0,
                 duration: 1000,
                 ease: 'Power1',
-                onComplete: () => {
-                    textoFlotante.destroy();
-                }
+                onComplete: () => textoFlotante.destroy()
             });
-        
+    
             personaje.setVelocityY(-350);
-        
-            // Crear caparazón en la posición del Koopa
+    
             this.caparazon = this.physics.add.sprite(koopa.x, koopa.y, 'Caparazon').setCollideWorldBounds(true);
             this.caparazon.body.setVelocityX(0);
             this.caparazon.moverCaparazon = false;
-        
+    
             this.physics.add.collider(this.caparazon, this.cespedColision);
             this.physics.add.collider(this.caparazon, this.tubos, this.rebotarGoomba, null, this);
             this.physics.add.collider(this.personaje, this.caparazon, this.colisionCaparazon, null, this);
             this.physics.add.collider(this.caparazon, this.muroColision, this.destruirCaparazon, null, this);
             this.physics.add.collider(this.caparazon, this.goombas, this.caparazonMataGoomba, null, this);
-        
-            koopa.destroy();  // Destruir inmediatamente
-        }
+    
+            koopa.destroy();
+        } 
         else {
-            // Tocado de costado
-            if (!(personaje.body.touching.down && koopa.body.touching.up)) {
-                if (personaje.powerUp) {
-                    personaje.powerUp = false;
-                    personaje.body.setSize(16, 16).setOffset(0, 0);
-                    personaje.anims.play('personaje-camina', true);
-                    console.log("El personaje perdió el poder del hongo");
-                    this.pausarEnemigos();
-                } else {
-                    this.morirPersonaje(personaje);
-                }
+            if (personaje.invulnerable) return;
+    
+            if (personaje.powerUp) {
+                personaje.powerUp = false;
+                personaje.invulnerable = true;
+                personaje.body.setSize(16, 16).setOffset(0, 0);
+                personaje.anims.play('personaje-camina', true);
+                console.log("El personaje perdió el poder del hongo");
+                this.pausarEnemigos();
+    
+                this.time.delayedCall(1000, () => {
+                    personaje.invulnerable = false;
+                });
+    
+            } else {
+                this.morirPersonaje(personaje);
             }
         }
     }
@@ -877,7 +873,7 @@ export class Game extends Scene {
             bloque.tieneEstrella = false;  // 👈 Esto evita que se genere otra estrella
         
             const estrella = this.physics.add.sprite(bloque.x, bloque.y - 10, "estrella")
-                .setScale(0.8)
+                .setScale(0.9)
                 .setBounce(0.8, 0.8)
                 .setCollideWorldBounds(true)
                 .setGravityY(300);

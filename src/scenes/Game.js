@@ -1,16 +1,21 @@
 import { Scene } from 'phaser';
-export class Game extends Scene
-{
-    constructor ()
-    {
+
+export class Game extends Scene {
+    constructor() {
         super('Game');
     }
 
-    create ()
-    {
-        this.add.image(2790, 186, "MontañaGrande").setScale(0.7)
-        this.add.image(2645, 200, "ArbustoMediano").setScale(0.7)
-            // Crear TILES SPRITES  
+    init() {
+        this.puntos = 0;
+        this.tiempoRestante = 180;
+    }
+
+    create() {
+        // Imágenes de fondo
+        this.add.image(2790, 186, "MontañaGrande").setScale(0.7);
+        this.add.image(2645, 200, "ArbustoMediano").setScale(0.7);
+
+        // Crear TILES SPRITES  
         const cespedData = [
             { x: 0, y: 244, w: 2496, h: 64 },
             { x: 1480, y: 244, w: 304, h: 64 },
@@ -21,10 +26,10 @@ export class Game extends Scene
         this.cespeds = cespedData.map(data =>
             this.add.tileSprite(data.x, data.y, data.w, data.h, "cesped")
         );
-        
+
         // Bloque largo
         this.bloqueLargo = this.add.tileSprite(1600, 80, 152, 16, "bloqueNormal");
-        
+
         // Datos de bloques inmóviles
         const bloquesInmovilesData = [
             { x: 2588, y: 204, w: 64 },
@@ -44,11 +49,11 @@ export class Game extends Scene
             { x: 2966, y: 172, w: 32 },
             { x: 2958, y: 156, w: 16 }
         ];
-        
+
         this.bloquesInmoviles = bloquesInmovilesData.map(data =>
             this.add.tileSprite(data.x, data.y, data.w, 16, "bloqueInmovil")
         );
-        
+
         // Grupo muro especial
         this.muroColision = this.physics.add.staticGroup();
         this.muroColision.create(2588, 204, null).setSize(64, 16).setVisible(false);
@@ -58,85 +63,87 @@ export class Game extends Scene
 
         // Datos de colisiones
         const colisionesData = [
-        { x: 0, y: 244, w: 2496, h: 64 },
-        { x: 1480, y: 244, w: 304, h: 64 },
-        { x: 2295, y: 244, w: 1181, h: 64 },
-        { x: 3700, y: 244, w: 1500, h: 64 },
-        { x: 1600, y: 80, w: 152, h: 16 },
-        { x: 2596, y: 188, w: 48, h: 16 },
-        { x: 2604, y: 172, w: 32, h: 16 },
-        { x: 2612, y: 155, w: 16, h: 16 },
-        { x: 2700, y: 204, w: 64, h: 16 },
-        { x: 2692, y: 188, w: 48, h: 16 },
-        { x: 2684, y: 172, w: 32, h: 16 },
-        { x: 2676, y: 156, w: 16, h: 16 },
-        { x: 2846, y: 204, w: 80, h: 16 },
-        { x: 2854, y: 188, w: 64, h: 16 },
-        { x: 2862, y: 172, w: 48, h: 16 },
-        { x: 2870, y: 156, w: 32, h: 16 },
-        { x: 2982, y: 204, w: 64, h: 16 },
-        { x: 2974, y: 188, w: 48, h: 16 },
-        { x: 2966, y: 172, w: 32, h: 16 },
-        { x: 2958, y: 156, w: 16, h: 16 }
+            { x: 0, y: 244, w: 2496, h: 64 },
+            { x: 1480, y: 244, w: 304, h: 64 },
+            { x: 2295, y: 244, w: 1181, h: 64 },
+            { x: 3700, y: 244, w: 1500, h: 64 },
+            { x: 1600, y: 80, w: 152, h: 16 },
+            { x: 2596, y: 188, w: 48, h: 16 },
+            { x: 2604, y: 172, w: 32, h: 16 },
+            { x: 2612, y: 155, w: 16, h: 16 },
+            { x: 2700, y: 204, w: 64, h: 16 },
+            { x: 2692, y: 188, w: 48, h: 16 },
+            { x: 2684, y: 172, w: 32, h: 16 },
+            { x: 2676, y: 156, w: 16, h: 16 },
+            { x: 2846, y: 204, w: 80, h: 16 },
+            { x: 2854, y: 188, w: 64, h: 16 },
+            { x: 2862, y: 172, w: 48, h: 16 },
+            { x: 2870, y: 156, w: 32, h: 16 },
+            { x: 2982, y: 204, w: 64, h: 16 },
+            { x: 2974, y: 188, w: 48, h: 16 },
+            { x: 2966, y: 172, w: 32, h: 16 },
+            { x: 2958, y: 156, w: 16, h: 16 }
         ];
 
         // Crear las colisiones desde los datos
         colisionesData.forEach(data => {
-        this.cespedColision.create(data.x, data.y, null)
-            .setSize(data.w, data.h)
-            .setVisible(false);
+            this.cespedColision.create(data.x, data.y, null)
+                .setSize(data.w, data.h)
+                .setVisible(false);
         });
 
-  
+        // Crear bloque visual centrado
         let anchoBloque = 144; // 9 bloques de 16px = 144
         let posicionX = 3490;
         let posicionY = 204;
 
         for (let i = 1; anchoBloque >= 16; i++) {
-            // Bloque visual centrado
             this[`bloqueInmovil${i}`] = this.add.tileSprite(posicionX, posicionY, anchoBloque, 16, "bloqueInmovil");
 
-            // Crear bloque de colisión con el mismo centro y tamaño
             let bloque = this.cespedColision.create(posicionX, posicionY, null);
-            bloque.body.setSize(anchoBloque, 16); // ancho dinámico, alto fijo de 16
-            bloque.setVisible(false); // Ocultar visualización si no estás debuggeando
+            bloque.body.setSize(anchoBloque, 16);
+            bloque.setVisible(false);
 
             // Preparar para la siguiente fila
-            anchoBloque -= 16;      // Reducir el ancho 1 bloque (16px)
-            posicionY -= 16;        // Subir una fila
-            posicionX += 8;         // Mover el centro hacia la derecha (la escalera sube)
+            anchoBloque -= 16;
+            posicionY -= 16;
+            posicionX += 8;
         }
 
-         //crear castillo
-         this.add.image(3820, 152, "castillo").setScale(0.8)
-         //MONTAÑA ANTES DE BANDERA 
-         this.add.image(3630, 186, "MontañaGrande").setScale(0.7)
-         
-         //crear bandera
-         this.add.image(3700,128, "bandera");
+        // Crear castillo
+        this.add.image(3820, 152, "castillo").setScale(0.8);
+        
+        // Montaña antes de bandera
+        this.add.image(3630, 186, "MontañaGrande").setScale(0.7);
+        
+        // Crear bandera
+        this.add.image(3700, 128, "bandera");
 
-         //montañas grandes
-         this.add.image(20, 186, "MontañaGrande").setScale(0.7)
-         this.add.image(955, 186, "MontañaGrande").setScale(0.7)
-         this.add.image(1870, 186, "MontañaGrande").setScale(0.7)
-         //montaña chica
-         this.add.image(360, 196, "MontañaChica").setScale(0.8)
-         this.add.image(1200, 196, "MontañaChica").setScale(0.8)
-         this.add.image(2200, 196, "MontañaChica").setScale(0.8)
-         this.add.image(3060, 196, "MontañaChica").setScale(0.8)
-         
-         //ARBUSTO GRANDE
-         this.add.image(270, 200, "ArbustoGrande").setScale(0.7)
-         this.add.image(2112, 200, "ArbustoGrande").setScale(0.7)
-         //arbusto chico
-         this.add.image(480, 200, "ArbustoChico").setScale(0.7)
-         this.add.image(1370, 200, "ArbustoChico").setScale(0.7)
-         this.add.image(2340, 200, "ArbustoChico").setScale(0.7)
-         this.add.image(3210, 200, "ArbustoChico").setScale(0.7)
-         //arbusto mediano
-         this.add.image(800, 200, "ArbustoMediano").setScale(0.7)
-         this.add.image(1127, 200, "ArbustoMediano").setScale(0.7)
-         this.add.image(1745, 200, "ArbustoMediano").setScale(0.7)
+        // Montañas grandes
+        this.add.image(20, 186, "MontañaGrande").setScale(0.7);
+        this.add.image(955, 186, "MontañaGrande").setScale(0.7);
+        this.add.image(1870, 186, "MontañaGrande").setScale(0.7);
+
+        // Montaña chica
+        this.add.image(360, 196, "MontañaChica").setScale(0.8);
+        this.add.image(1200, 196, "MontañaChica").setScale(0.8);
+        this.add.image(2200, 196, "MontañaChica").setScale(0.8);
+        this.add.image(3060, 196, "MontañaChica").setScale(0.8);
+
+        // Arbusto grande
+        this.add.image(270, 200, "ArbustoGrande").setScale(0.7);
+        this.add.image(2112, 200, "ArbustoGrande").setScale(0.7);
+
+        // Arbusto chico
+        this.add.image(480, 200, "ArbustoChico").setScale(0.7);
+        this.add.image(1370, 200, "ArbustoChico").setScale(0.7);
+        this.add.image(2340, 200, "ArbustoChico").setScale(0.7);
+        this.add.image(3210, 200, "ArbustoChico").setScale(0.7);
+
+        // Arbusto mediano
+        this.add.image(800, 200, "ArbustoMediano").setScale(0.7);
+        this.add.image(1127, 200, "ArbustoMediano").setScale(0.7);
+        this.add.image(1745, 200, "ArbustoMediano").setScale(0.7);
 
          //nube chica
          this.add.image(130, 50, "NubeChica").setScale(0.2)
@@ -148,17 +155,18 @@ export class Game extends Scene
          this.add.image(2900, 50, "NubeChica").setScale(0.2)
          this.add.image(3150, 30, "NubeChica").setScale(0.2)
          this.add.image(3750, 50, "NubeChica").setScale(0.2)
+
          //nube grande
          this.add.image(590, 50, "NubeGrande").setScale(0.8)
          this.add.image(1470, 50, "NubeGrande").setScale(0.8)
          this.add.image(2410, 50, "NubeGrande").setScale(0.8)
          this.add.image(3330, 50, "NubeGrande").setScale(0.8)
+
          //nube mediana
          this.add.image(740, 30, "NubeMediana").setScale(0.2)
          this.add.image(1650, 30, "NubeMediana").setScale(0.2)
          this.add.image(2570, 30, "NubeMediana").setScale(0.2)
          this.add.image(3480, 30, "NubeMediana").setScale(0.2)
-         
          
         // Crear el personaje
         this.personaje = this.physics.add.sprite(10, 200, "personaje").setGravityY(1300). setOrigin(0, 1)
@@ -170,8 +178,8 @@ export class Game extends Scene
         this.frenado = 30;
         this.estaSaltando = false;
         this.tiempoSalto = 0;
+        this.personaje.invencible = false;
 
-  
         // Colisión entre el personaje y el césped
         this.physics.add.collider(this.personaje, this.cespedColision);
         this.physics.add.collider(this.personaje, this.muroColision);
@@ -182,7 +190,7 @@ export class Game extends Scene
         // Cámara que sigue al jugador
         this.cameras.main.setBounds(0, 0, 3900, 244);
         this.cameras.main.startFollow(this.personaje);
-
+    
         // Crear el bloque misterioso con la animación
         this.bloqueMisterioso = this.physics.add.staticGroup();
         this.bloqueMisterioso1 = this.bloqueMisterioso.create(330, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
@@ -212,49 +220,60 @@ export class Game extends Scene
         this.bloqueMisterioso13 = this.bloqueMisterioso.create(3232, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
         this.bloqueMisterioso13.originalY = 150;
         this.physics.add.collider(this.personaje, this.bloqueMisterioso, (personaje, bloque) => {
-            // Verifica si la parte superior del personaje está tocando la parte superior del bloque
-            // Y además, que el personaje esté dentro de un rango en el eje X del bloque para evitar activaciones por los costados
-            if (
-                personaje.body.top <= bloque.y + bloque.height / 2 && 
-                personaje.body.bottom > bloque.y - bloque.height / 2 &&
-                Math.abs(personaje.x - bloque.x) < bloque.width / 2 // Verifica que el personaje esté dentro del rango de la anchura del bloque
-            ) {
-                // Llamar a la función para hacer saltar el bloque solo cuando el personaje toque la parte superior
-                this.hacerSaltarBloque(bloque);
+         // Verifica si la parte superior del personaje está tocando la parte superior del bloque
+        // Y además, que el personaje esté dentro de un rango en el eje X del bloque para evitar activaciones por los costados
+        if (
+             personaje.body.top <= bloque.y + bloque.height / 2 && 
+            personaje.body.bottom > bloque.y - bloque.height / 2 &&
+            Math.abs(personaje.x - bloque.x) < bloque.width / 2 // Verifica que el personaje esté dentro del rango de la anchura del bloque
+         ) {
+            // Llamar a la función para hacer saltar el bloque solo cuando el personaje toque la parte superior
+            this.hacerSaltarBloque(bloque);
             }
         });
         
         
 
 
-        //crear bloque noermal
+        // Crear bloque normal
         this.bloqueNormal = this.physics.add.staticGroup();
-        this.bloqueNormal.create(400, 150, "bloqueNormal");
-        this.bloqueNormal.create(432, 150, "bloqueNormal");
-        this.bloqueNormal.create(464, 150, "bloqueNormal");
-        this.bloqueNormal.create(1479, 150, "bloqueNormal");
-        this.bloqueNormal.create(1511, 150, "bloqueNormal");
-        //moneda
-        this.bloqueNormal.create(1800, 150, "bloqueNormal");
-        this.bloqueNormal.create(1784, 80, "bloqueNormal");
-        this.bloqueNormal.create(1768, 80, "bloqueNormal");
-        this.bloqueNormal.create(1752, 80, "bloqueNormal");
-        this.bloqueNormal.create(1916, 150, "bloqueNormal");
-        //de este sale una estrella
-        this.bloqueNormal.create(1932, 150, "bloqueNormal");
-        this.bloqueNormal.create(2292, 150, "bloqueNormal");
-        this.bloqueNormal.create(2340, 80, "bloqueNormal");
-        this.bloqueNormal.create(2356, 80, "bloqueNormal");
-        this.bloqueNormal.create(2372, 80, "bloqueNormal");
-        this.bloqueNormal.create(2456, 80, "bloqueNormal");
-        this.bloqueNormal.create(2472, 150, "bloqueNormal");
-        this.bloqueNormal.create(2488, 150, "bloqueNormal");
-        this.bloqueNormal.create(2504, 80, "bloqueNormal");
-        this.bloqueNormal.create(3200, 150, "bloqueNormal");
-        this.bloqueNormal.create(3216, 150, "bloqueNormal");
-        this.bloqueNormal.create(3248, 150, "bloqueNormal");
-        this.physics.add.collider(this.personaje, this.bloqueNormal);
-    
+
+        const posicionesBloques = [
+            { x: 400, y: 150 },
+            { x: 432, y: 150 },
+            { x: 464, y: 150 },
+            { x: 1479, y: 150 },
+            { x: 1511, y: 150 },
+            { x: 1800, y: 150 },
+            { x: 1784, y: 80 },
+            { x: 1768, y: 80 },
+            { x: 1752, y: 80 },
+            { x: 1916, y: 150 },
+            { x: 1932, y: 150 },  // <-- Este tendrá estrella
+            { x: 2292, y: 150 },
+            { x: 2340, y: 80 },
+            { x: 2356, y: 80 },
+            { x: 2372, y: 80 },
+            { x: 2456, y: 80 },
+            { x: 2472, y: 150 },
+            { x: 2488, y: 150 },
+            { x: 2504, y: 80 },
+            { x: 3200, y: 150 },
+            { x: 3216, y: 150 },
+            { x: 3248, y: 150 },
+        ];
+
+        posicionesBloques.forEach(pos => {
+            const bloque = this.bloqueNormal.create(pos.x, pos.y, "bloqueNormal");
+            // Asignar la propiedad originalY a cada bloque
+            bloque.originalY = pos.y;
+            // Asignar tieneEstrella solo al bloque de la posición 1932,150
+            bloque.tieneEstrella = (pos.x === 1932 && pos.y === 150);
+        });
+        this.physics.add.collider(this.personaje, this.bloqueNormal, (personaje, bloque) => {
+            this.hacerSaltarBloqueNormal(bloque);
+        });
+
         // Crear un grupo único para todos los tubos
         this.tubos = this.physics.add.staticGroup();
         this.tubos.create(560, 196, "tuboCorto")
@@ -271,10 +290,11 @@ export class Game extends Scene
         // Colisión entre el personaje y los tubos
         this.physics.add.collider(this.personaje, this.tubos);
 
+        //crear goombas
         this.goombas = this.physics.add.group();
         this.physics.add.collider(this.goombas, this.bloqueNormal);
         this.physics.add.collider(this.goombas, this.bloqueMisterioso);
-        //crear goombas
+      
         this.goombas.create(420, 208, 'goomba');
         this.goombas.create(750, 208, 'goomba');
         this.goombas.create(900, 208, 'goomba');
@@ -297,7 +317,8 @@ export class Game extends Scene
         this.physics.add.collider(this.personaje, this.goombas, this.colisionEnemigoGoomba, null, this);
         this.goombaActiva = false; 
 
-                // Crear al Koopa
+
+        // Crear al Koopa
         this.koopa = this.physics.add.sprite(2150, 208, 'koopa');
         this.koopa.setVelocityX(0);  // Quieto al principio.
         this.koopa.setCollideWorldBounds(true);
@@ -305,7 +326,7 @@ export class Game extends Scene
         this.physics.add.overlap(this.personaje, this.koopa, this.hitKoopa, null, this);
         this.koopaActiva = false;
         
-        //HONGOS
+        //crear hongo
         this.hongos = this.physics.add.group({
             allowGravity: true,
         });
@@ -316,19 +337,68 @@ export class Game extends Scene
         this.physics.add.collider(this.hongos, this.bloquesVacios);
         this.physics.add.collider(this.hongos, this.tubos);
 
-        //bloque vacio
+        //crear estrellas
+        this.estrellas = this.physics.add.group({
+            allowGravity: true,
+        });
+        this.physics.add.collider(this.estrellas, this.cespedColision);
+        this.physics.add.collider(this.estrellas, this.bloqueMisterioso);
+        this.physics.add.collider(this.estrellas, this.bloqueNormal);
+        this.physics.add.collider(this.estrellas, this.bloquesInmoviles);
+        this.physics.add.collider(this.estrellas, this.bloquesVacios);
+        this.physics.add.collider(this.estrellas, this.tubos);
+
+        //bloques vacios
         this.bloquesVacios = this.physics.add.staticGroup();
         this.physics.add.collider(this.personaje, this.bloquesVacios);
 
+        this.moneda = this.physics.add.group()
         // Crear los cursores
-        this.keys = this.input.keyboard.createCursorKeys();
 
+        //crear movimiento con teclas
+        this.keys = this.input.keyboard.createCursorKeys();
+        
+        // texto y puntos
+        this.textoPuntos = this.add.text(20, 10, 'Puntos: 0', {
+            font: '15px Arial',
+            fill: '#ffffff',
+            stroke: '#000000',         // Color del borde (negro)
+            strokeThickness: 2         // Grosor del borde
+        });
+        this.textoPuntos.setScrollFactor(0);
+
+        this.textoTemporizador = this.add.text(150, 10, 'Tiempo: 3:00', {
+            font: '15px Arial',
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 2         // Grosor del borde
+        });
+        this.textoTemporizador.setScrollFactor(0);
+        this.timerEvento = this.time.addEvent({
+            delay: 1000, // cada 1 segundo
+            callback: () => {
+                this.tiempoRestante--;
+
+                // Formatear minutos y segundos
+                let minutos = Math.floor(this.tiempoRestante / 60);
+                let segundos = this.tiempoRestante % 60;
+
+                this.textoTemporizador.setText('Tiempo: ' + minutos + ':' + (segundos < 10 ? '0' + segundos : segundos));
+
+                if (this.tiempoRestante <= 0) {
+                    this.timerEvento.remove();  // Parar el temporizador
+                    this.scene.start('GameOver');  // Cambiar a la escena GameOver
+                }
+            },
+            callbackScope: this,
+            loop: true
+        });
     }
 
     update() {
         // No permitir movimiento si está muerto
         if (this.personaje.isDead) return;
-
+    
         // Movimiento horizontal
         if (this.keys.right.isDown) {
             this.velocidadActual = Math.min(this.velocidadActual + this.aceleracion, this.velocidadMaxima);
@@ -346,50 +416,72 @@ export class Game extends Scene
             }
             this.personaje.setVelocityX(this.velocidadActual);
         }
-
-        // Animación de caminar o quieto (solo si está en el suelo)
+            // Animación de caminar o quieto (solo si está en el suelo)
         if (this.personaje.body.touching.down) {
             if (this.velocidadActual !== 0) {
-                this.personaje.anims.play("personaje-camina", true);
+                if (this.personaje.powerUp) {
+                    this.personaje.anims.play("PersonajeGrande-camina", true); // Animación normal de caminar
+                } else {
+                    this.personaje.anims.play("personaje-camina", true);
+                }
             } else {
+                // Cuando el personaje está quieto
                 this.personaje.anims.stop();
-                this.personaje.setTexture("personaje", 0);
-            }
+                
+                if (this.personaje.powerUp) {
+                    // Mostrar solo el primer frame de la animación 'PersonajeGrande-camina'
+                    this.personaje.setTexture("PersonajeGrande", 0);  // Asegúrate de que el frame 0 se muestra
+                } else {
+                    this.personaje.setTexture("personaje", 0);
+                }
+            }                
         }
 
         // Salto
         if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
             this.personaje.setVelocityY(-300);
-            this.personaje.anims.play("personaje-salta", true);
+            if (this.personaje.powerUp) {
+                this.personaje.anims.play("PersonajeGrande-salta", true);
+            } else {
+                this.personaje.anims.play("personaje-salta", true);
+            }
             this.estaSaltando = true;
             this.tiempoSalto = 0;
         } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
             this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
+            if (this.personaje.powerUp) {
+                this.personaje.anims.play("PersonajeGrande-salta", true);
+            } else {
+                this.personaje.anims.play("personaje-salta", true);
+            }
             this.tiempoSalto++;
-            this.personaje.anims.play("personaje-salta", true);
         }
-
+    
         // Soltar salto
         if (this.keys.up.isUp) {
             this.estaSaltando = false;
         }
-
+    
         // Animación en el aire (por caída)
         if (!this.personaje.body.touching.down && !this.estaSaltando) {
-            this.personaje.anims.play("personaje-salta", true);
+            if (this.personaje.powerUp) {
+                this.personaje.anims.play("PersonajeGrande-salta", true);
+            } else {
+                this.personaje.anims.play("personaje-salta", true);
+            }
         }
-
+    
         // Detectar muerte por caída
         if (this.personaje.y > 230) {
             this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);
             this.personaje.setVelocity(0, -400);
-
+    
             this.time.delayedCall(2000, () => {
                 this.scene.restart();
             });
         }
-
+    
         // Activar goombas
         this.goombas.children.iterate(goomba => {
             if (!goomba.activado && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, goomba.x, goomba.y) < 200) {
@@ -400,36 +492,177 @@ export class Game extends Scene
                 }
             }
         });
-
+    
         // Activar koopa
         if (!this.koopaActiva) {
             const distancia = Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.koopa.x, this.koopa.y);
             if (distancia < 200 && this.koopa.anims.getName() !== "koopa-muerte") {
                 this.koopa.setVelocityX(-35);
-                this.koopa.anims.play("koopa-caminar", true);
+                this.koopa.anims.play("koopa-camina", true);
                 this.koopaActiva = true;
             }
         }
     }
-
+    
     colisionEnemigoGoomba(personaje, goombas) {
-        if (personaje.body.touching.down && goombas.body.touching.up) {
+        if (personaje.invencible) {
+            // Salen volando y luego se destruyen
+            goombas.setVelocityY(-500);
+            goombas.setVelocityX(Phaser.Math.Between(-100, 100));  // Aleatorio para más estilo
+            goombas.body.checkCollision.none = true;  // Que no vuelva a chocar
+            this.time.delayedCall(500, () => {
+                goombas.destroy();
+                this.sumarPuntos(100);  // Sumar 100 puntos
+    
+                // Crear texto flotante
+                let textoFlotante = this.add.text(goombas.x, goombas.y, '100', {
+                    font: '16px Arial',
+                    fill: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                });
+    
+                // Animar el texto flotante para que suba
+                this.tweens.add({
+                    targets: textoFlotante,
+                    y: goombas.y - 50,  // Mover 50 píxeles hacia arriba
+                    alpha: 0,            // Desvanecer
+                    duration: 1000,      // Duración de la animación
+                    ease: 'Power1',      // Tipo de animación
+                    onComplete: () => {
+                        textoFlotante.destroy(); // Destruir el texto flotante cuando termine la animación
+                    }
+                });
+            });
+        } 
+        else if (personaje.body.touching.down && goombas.body.touching.up) {
+            // Matar al Goomba como siempre
             goombas.anims.play("goomba-muerte", true);
             goombas.setVelocityX(0);
-    
             setTimeout(() => {
                 goombas.destroy();
-            }, 300);
+                this.sumarPuntos(100);  // Sumar 100 puntos
     
-            // Hacemos que el personaje dé un pequeño salto
+                // Crear texto flotante
+                let textoFlotante = this.add.text(goombas.x, goombas.y, '100', {
+                    font: '16px Arial',
+                    fill: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                });
+    
+                // Animar el texto flotante para que suba
+                this.tweens.add({
+                    targets: textoFlotante,
+                    y: goombas.y - 50,  // Mover 50 píxeles hacia arriba
+                    alpha: 0,            // Desvanecer
+                    duration: 1000,      // Duración de la animación
+                    ease: 'Power1',      // Tipo de animación
+                    onComplete: () => {
+                        textoFlotante.destroy(); // Destruir el texto flotante cuando termine la animación
+                    }
+                });
+            }, 300);
             personaje.setVelocityY(-350);
+        } 
+        else {
+            // Tocado de costado o por arriba
+            if (personaje.powerUp) {
+                personaje.powerUp = false;
+                personaje.body.setSize(16, 16).setOffset(0, 0);
+                personaje.anims.play('personaje-camina', true);
+                console.log("El personaje perdió el poder del hongo");
+                this.pausarEnemigos();
+            } else {
+                this.morirPersonaje(personaje);
+            }
         }
-        else{
-              this.morirPersonaje(personaje);
-              goombas.setVelocityX(0)
-        }
-    }    
+    }
+    
 
+    hitKoopa = (personaje, koopa) => {
+        if (personaje.invencible) {
+            // Salen volando y luego se destruyen
+            koopa.setVelocityY(-500);
+            koopa.setVelocityX(Phaser.Math.Between(-100, 100));  // Movimiento aleatorio
+            koopa.body.checkCollision.none = true;
+            this.time.delayedCall(500, () => {
+                koopa.destroy();
+                this.sumarPuntos(150);  // Sumar 150 puntos
+    
+                // Crear texto flotante
+                let textoFlotante = this.add.text(koopa.x, koopa.y, '150', {
+                    font: '16px Arial',
+                    fill: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 2
+                });
+    
+                // Animar el texto flotante para que suba
+                this.tweens.add({
+                    targets: textoFlotante,
+                    y: koopa.y - 50,  // Mover 50 píxeles hacia arriba
+                    alpha: 0,         // Desvanecer
+                    duration: 1000,
+                    ease: 'Power1',
+                    onComplete: () => {
+                        textoFlotante.destroy();
+                    }
+                });
+            });
+        } 
+        else if (personaje.body.touching.down && koopa.body.touching.up) {
+            // Saltó encima del Koopa
+            this.sumarPuntos(150);  // Sumar 150 puntos antes de destruir
+        
+            // Crear texto flotante
+            let textoFlotante = this.add.text(koopa.x, koopa.y, '150', {
+                font: '16px Arial',
+                fill: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 2
+            });
+        
+            this.tweens.add({
+                targets: textoFlotante,
+                y: koopa.y - 50,
+                alpha: 0,
+                duration: 1000,
+                ease: 'Power1',
+                onComplete: () => {
+                    textoFlotante.destroy();
+                }
+            });
+        
+            personaje.setVelocityY(-350);
+        
+            // Crear caparazón en la posición del Koopa
+            this.caparazon = this.physics.add.sprite(koopa.x, koopa.y, 'Caparazon').setCollideWorldBounds(true);
+            this.caparazon.body.setVelocityX(0);
+            this.caparazon.moverCaparazon = false;
+        
+            this.physics.add.collider(this.caparazon, this.cespedColision);
+            this.physics.add.collider(this.caparazon, this.tubos, this.rebotarGoomba, null, this);
+            this.physics.add.collider(this.personaje, this.caparazon, this.colisionCaparazon, null, this);
+            this.physics.add.collider(this.caparazon, this.muroColision, this.destruirCaparazon, null, this);
+            this.physics.add.collider(this.caparazon, this.goombas, this.caparazonMataGoomba, null, this);
+        
+            koopa.destroy();  // Destruir inmediatamente
+        }
+        else {
+            if (personaje.powerUp) {
+                personaje.powerUp = false;
+                personaje.body.setSize(16, 16).setOffset(0, 0);
+                personaje.anims.play('personaje-camina', true);
+                console.log("El personaje perdió el poder del hongo");
+                this.pausarEnemigos();
+            } else {
+                this.morirPersonaje(personaje);
+            }
+        }
+    }
+    
+    
     rebotarGoomba(goomba, objeto) {
         if (goomba.body.blocked.left || goomba.body.touching.left) {
             goomba.setVelocityX(40); // Cambia a derecha
@@ -440,126 +673,319 @@ export class Game extends Scene
         }
     }
     
-    morirPersonaje(game){
-        this.personaje.isDead = true;
-            this.personaje.anims.play("personaje-muere", true);
-            this.personaje.setVelocity(0, 0);
-            this.personaje.setVelocityY(-400);
 
-            // Reiniciar la escena después de 2 segundos
+    morirPersonaje() {
+        this.personaje.isDead = true;
+        this.personaje.anims.play("personaje-muere", true);
+        this.personaje.setVelocity(0, 0);
+        this.personaje.setVelocityY(-400);
+        this.pausarEnemigos();
+    
+        this.time.delayedCall(2000, () => {
+            this.scene.restart();
+        });
+    }
+
+
+     pausarEnemigos() {
+        this.goombas.getChildren().forEach(goomba => {
+        goomba.body.oldVelocityX = goomba.body.velocity.x;
+        goomba.setVelocityX(0);
+        });
+        
+        // Si tenés UN solo Koopa:
+        if (this.koopa && this.koopa.body) {
+            this.koopa.body.oldVelocityX = this.koopa.body.velocity.x;
+            this.koopa.setVelocityX(0);
+        
             this.time.delayedCall(2000, () => {
-                this.scene.restart();
+                this.koopa.setVelocityX(this.koopa.body.oldVelocityX);
             });
         }
-
-
-        hitKoopa = (personaje, koopa) => {
-            if (personaje.body.velocity.y > 0) {
-                koopa.destroy();
-                personaje.setVelocityY(-350);
         
-                // Crear caparazón
-                this.caparazon = this.physics.add.sprite(koopa.x, koopa.y, 'Caparazon').setCollideWorldBounds(true);
-                this.caparazon.body.setVelocityX(0);
-                this.caparazon.moverCaparazon = false;
+        this.time.delayedCall(2000, () => {
+            this.goombas.getChildren().forEach(goomba => {
+            goomba.setVelocityX(goomba.body.oldVelocityX);
+            });
+        });
+    }
         
-                // Colisiones del caparazón
-                this.physics.add.collider(this.caparazon, this.cespedColision);
-                this.physics.add.collider(this.caparazon, this.tubos, this.rebotarGoomba, null, this);
-                this.physics.add.collider(this.personaje, this.caparazon, this.colisionCaparazon, null, this);
-                this.physics.add.collider(this.caparazon, this.muroColision, this.destruirCaparazon, null, this);
-                this.physics.add.collider(this.caparazon, this.goombas, this.caparazonMataGoomba, null, this);
         
-            } else {
-                this.morirPersonaje();
-                koopa.setVelocityX(0).disableBody(true, true);
-                this.time.delayedCall(1, () => koopa.enableBody(false, 0, 0, true, true));
-            }
+    colisionCaparazon = () => {
+        if (!this.caparazon) return;
+        
+        if (this.caparazon.body.velocity.x === 0 && !this.caparazon.moverCaparazon) {
+            this.caparazon.moverCaparazon = true;
+            this.caparazon.body.setVelocityX(200);  // Activa movimiento
+        
+            this.sumarPuntos(50);  // Sumar 50 puntos
+        
+            // Crear texto flotante
+            let textoFlotante = this.add.text(this.caparazon.x, this.caparazon.y, '50', {
+                font: '16px Arial',
+                fill: '#ffffff',
+                stroke: '#000000',
+                strokeThickness: 2
+            });
+        
+            // Animar el texto flotante para que suba y desaparezca
+            this.tweens.add({
+                targets: textoFlotante,
+                y: this.caparazon.y - 50,
+                alpha: 0,
+                duration: 1000,
+                ease: 'Power1',
+                onComplete: () => {
+                    textoFlotante.destroy();
+                }
+            });
         }
         
-        colisionCaparazon = () => {
-            if (!this.caparazon) return;
-        
-            if (this.caparazon.body.velocity.x === 0 && !this.caparazon.moverCaparazon) {
-                this.caparazon.moverCaparazon = true;
-            }
-        
-            if (this.caparazon.moverCaparazon) {
-                this.caparazon.body.setVelocityX(200);
-            }
+        if (this.caparazon.moverCaparazon) {
+            this.caparazon.body.setVelocityX(200);
         }
+    }
         
-        destruirCaparazon = (caparazon) => {
-            caparazon.destroy();
-        }
         
-        caparazonMataGoomba = (caparazon, goomba) => {
-            goomba.body.setVelocityY(-200);
-            caparazon.body.setVelocityX(200);
-            this.time.delayedCall(200, () => goomba.destroy());
-        }
-        
-        hacerSaltarBloque = function(bloque) {
-            if (!bloque.recolectado) {
-                this.tweens.add({
-                    targets: bloque,
-                    y: bloque.originalY - 16,
-                    duration: 300,
-                    ease: 'Power1',
-                    onComplete: () => {
-                        bloque.recolectado = true;
-        
-                        // Si es de los que deben spawnear hongo
-                        if (bloque === this.bloqueMisterioso2 || bloque === this.bloqueMisterioso5 || bloque === this.bloqueMisterioso9) {
-                            const hongo = this.hongos.create(bloque.x, bloque.y - 1, "Hongo").setScale(0.5).setBounce(1, 0) ;
-                            
-                            this.tweens.add({
-                                targets: hongo,
-                                y: hongo.y - 2,
-                                duration: 100,
-                                ease: 'Power1',
-                                onComplete: () => {
-                                    hongo.body.setVelocityX(80); // Hacia la derecha
-                                }
-                            });
-        
-                            // Colisión personaje-hongo
-                            this.physics.add.collider(this.personaje, hongo, (personaje, objeto) => {
-                                objeto.destroy();
-                                console.log("¡Hongo recolectado!");
-                            });
-        
-                            // Rebotes hongo con otros objetos
-                            this.physics.add.collider(hongo, this.tubos, () => {
-                                hongo.body.setVelocityX(-hongo.body.velocity.x); // Cambia dirección
-                            });
-                            this.physics.add.collider(hongo, this.bloquesInmoviles, () => {
-                                hongo.body.setVelocityX(-hongo.body.velocity.x);
-                            });
-                            this.physics.add.collider(hongo, this.bloqueNormal, () => {
-                                hongo.body.setVelocityX(-hongo.body.velocity.x);
-                            });
-                            this.physics.add.collider(hongo, this.bloqueMisterioso, () => {
-                                hongo.body.setVelocityX(-hongo.body.velocity.x);
-                            });
+    destruirCaparazon = (caparazon) => {
+        caparazon.destroy();
+    }
+    
+    caparazonMataGoomba = (caparazon, goomba) => {
+        goomba.body.setVelocityY(-200);
+        caparazon.body.setVelocityX(200);
+        this.time.delayedCall(200, () => goomba.destroy());
+    }
+    
+    hacerSaltarBloque = function(bloque) {
+        if (!bloque.recolectado) {
+            this.tweens.add({
+                targets: bloque,
+                y: bloque.originalY - 10,
+                duration: 100,
+                ease: 'Power1',
+                onComplete: () => {
+                    bloque.recolectado = true;
+    
+                    // Llamar a la función para crear el hongo o la moneda
+                    this.generarObjeto(bloque);
+    
+                    // Vuelve el bloque a su posición original
+                    this.tweens.add({
+                        targets: bloque,
+                        y: bloque.originalY,
+                        duration: 100,
+                        ease: 'Power1',
+                        onComplete: () => {
+                            bloque.destroy();
+                            const bloqueVacio = this.physics.add.staticSprite(bloque.x, bloque.originalY, 'bloqueVacio');
+                            this.physics.add.collider(this.personaje, bloqueVacio);
                         }
-        
-                        // Vuelve bloque a su posición
+                    });
+                }
+            });
+        }
+    };
+    
+    hacerSaltarBloqueNormal = function(bloque) {
+        // Verificamos si el personaje está tocando la parte superior del bloque (lado 1)
+        if (!bloque.recolectado &&
+            this.personaje.body.touching.up && // Verifica si el personaje está tocando la parte superior del bloque
+            this.personaje.body.y + this.personaje.body.height >= bloque.y) { // Verifica si la parte superior del personaje toca la parte superior del bloque
+            
+            // Elevamos el bloque
+            this.tweens.add({
+                targets: bloque,
+                y: bloque.originalY - 10,
+                duration: 100,
+                ease: 'Power1',
+                onComplete: () => {
+                    bloque.recolectado = true; // Marcamos como recolectado para evitar que se eleve varias veces simultáneamente
+    
+                    if (bloque.tieneEstrella) {
+                        this.generarObjeto(bloque);
+                    }
+    
+                    // Si el personaje es grande, destruimos el bloque
+                    if (this.personaje.powerUp) {
+                        bloque.destroy();
+                        console.log("¡Bloque destruido!");
+                    } else {
+                        // Vuelve el bloque a su posición original
                         this.tweens.add({
                             targets: bloque,
                             y: bloque.originalY,
-                            duration: 300,
+                            duration: 100,
                             ease: 'Power1',
                             onComplete: () => {
-                                // Cambiar bloque por bloqueVacio
-                                bloque.destroy();
-                                const bloqueVacio = this.physics.add.staticSprite(bloque.x, bloque.originalY, 'bloqueVacio');
-                                this.physics.add.collider(this.personaje, bloqueVacio);
+                                // Después de que vuelva a su posición original, permitimos que se eleve de nuevo
+                                bloque.recolectado = false;
                             }
                         });
                     }
-                });
-            }
-        };
+                }
+            });
+        }
+    };
+    
+    generarObjeto = function(bloque) {
+        if (bloque.tieneEstrella) {
+    
+            bloque.tieneEstrella = false;  // 👈 Esto evita que se genere otra estrella
         
-}
+            const estrella = this.physics.add.sprite(bloque.x, bloque.y - 10, "estrella")
+                .setScale(0.8)
+                .setBounce(0.8, 0.8)
+                .setCollideWorldBounds(true)
+                .setGravityY(300);
+        
+            estrella.body.setVelocityX(80);
+            estrella.body.setVelocityY(-50);
+        
+            this.physics.add.overlap(this.personaje, estrella, (personaje, estrella) => {
+                estrella.destroy();
+                console.log("¡Estrella recolectada!");
+                personaje.invencible = true;
+        
+                personaje.setTint(0x00ff00);
+                let intervalId = this.time.addEvent({
+                    delay: 500,
+                    callback: () => {
+                        if (personaje.invencible) {
+                            const color = Phaser.Display.Color.RandomRGB().color;
+                            personaje.setTint(color);
+                        }
+                    },
+                    loop: true
+                });
+        
+                this.time.delayedCall(10000, () => {
+                    personaje.invencible = false;
+                    personaje.clearTint();
+                    intervalId.remove();
+                });
+            });
+    
+            // Rebote con bloques inmóviles (cambia dirección al colisionar)
+            this.physics.add.collider(estrella, this.bloquesInmoviles, () => {
+                estrella.body.setVelocityX(estrella.body.velocity.x * -1);  // Invertir dirección horizontal
+                // Mantener el rebote vertical constante sin perder altura
+                if (estrella.body.velocity.y > 0) {  // Si la estrella está cayendo
+                    estrella.body.setVelocityY(-50);  // Mantener la velocidad de rebote
+                }
+            });
+    
+            // Colisiones con otros objetos (bloques normales, tubos, etc.)
+            this.physics.add.collider(estrella, this.tubos, () => {
+                estrella.body.setVelocityX(estrella.body.velocity.x * -1);  // Invertir dirección horizontal
+                // Mantener el rebote vertical constante
+                if (estrella.body.velocity.y > 0) {  // Si la estrella está cayendo
+                    estrella.body.setVelocityY(-50);  // Mantener la velocidad de rebote
+                }
+            });
+            this.physics.add.collider(estrella, this.bloqueNormal, () => {
+                estrella.body.setVelocityX(estrella.body.velocity.x * -1);  // Invertir dirección horizontal
+                // Mantener el rebote vertical constante
+                if (estrella.body.velocity.y > 0) {  // Si la estrella está cayendo
+                    estrella.body.setVelocityY(-50);  // Mantener la velocidad de rebote
+                }
+            });
+            this.physics.add.collider(estrella, this.bloqueMisterioso, () => {
+                estrella.body.setVelocityX(estrella.body.velocity.x * -1);  // Invertir dirección horizontal
+                // Mantener el rebote vertical constante
+                if (estrella.body.velocity.y > 0) {  // Si la estrella está cayendo
+                    estrella.body.setVelocityY(-50);  // Mantener la velocidad de rebote
+                }
+            });
+    
+            // Colisión con el suelo (cespedColision), si es necesario
+            this.physics.add.collider(estrella, this.cespedColision, () => {
+                // La estrella sigue rebotando pero sin perder altura
+                if (estrella.body.velocity.y > 0) {  // Si la estrella está cayendo
+                    estrella.body.setVelocityY(-50);  // Mantener la velocidad de rebote
+                }
+                // Limitar el rebote en el eje Y para que nunca suba más de 150 píxeles
+                if (estrella.y < 150) {
+                    estrella.body.setVelocityY(estrella.body.velocity.y * -1);  // Asegura que no suba demasiado
+                }
+            });
+    
+        } else if (bloque === this.bloqueMisterioso2 || bloque === this.bloqueMisterioso5 || bloque === this.bloqueMisterioso9) {
+            // Generar hongo
+            const hongo = this.hongos.create(bloque.x, bloque.y - 1, "Hongo").setScale(0.8).setBounce(1, 0);
+    
+            this.tweens.add({
+                targets: hongo,
+                y: hongo.y - 1,
+                duration: 100,
+                ease: 'Power1',
+                onComplete: () => {
+                    hongo.body.setVelocityX(80);
+                }
+            });
+    
+            this.physics.add.collider(this.personaje, hongo, (personaje, objeto) => {
+                objeto.destroy();
+                console.log("¡Hongo recolectado!");
+                personaje.powerUp = true;
+                personaje.body.setSize(18, 32).setOffset(0, 0);
+            });
+    
+            this.physics.add.collider(hongo, this.tubos, () => {
+                hongo.body.setVelocityX(-hongo.body.velocity.x);
+            });
+            this.physics.add.collider(hongo, this.bloquesInmoviles, () => {
+                hongo.body.setVelocityX(-hongo.body.velocity.x);
+            });
+            this.physics.add.collider(hongo, this.bloqueNormal, () => {
+                hongo.body.setVelocityX(-hongo.body.velocity.x);
+            });
+            this.physics.add.collider(hongo, this.bloqueMisterioso, () => {
+                hongo.body.setVelocityX(-hongo.body.velocity.x);
+            });
+    
+        } else {
+            // Generar moneda
+            const moneda = this.moneda.create(bloque.x, bloque.y - 1, "Moneda").setScale(0.8);
+            moneda.anims.play('monedaGira', true);
+    
+            this.tweens.add({
+                targets: moneda,
+                y: moneda.y - 20,
+                duration: 600,
+                ease: 'Power1',
+                onComplete: () => {
+                    moneda.destroy();
+    
+                    this.sumarPuntos(50);  // Sumar 50 puntos por la moneda
+                    console.log("¡Moneda recolectada!");
+    
+                    // Crear texto flotante
+                    let textoFlotante = this.add.text(moneda.x, moneda.y, '50', {
+                        font: '16px Arial',
+                        fill: '#ffffff',
+                        stroke: '#000000',
+                        strokeThickness: 2
+                    });
+    
+                    this.tweens.add({
+                        targets: textoFlotante,
+                        y: moneda.y - 50,
+                        alpha: 0,
+                        duration: 1000,
+                        ease: 'Power1',
+                        onComplete: () => {
+                            textoFlotante.destroy();
+                        }
+                    });
+                }
+            });
+        }
+    }
+    
+    sumarPuntos(puntos) {
+        this.puntos += puntos;
+        // Actualizamos el texto
+        this.textoPuntos.setText('Puntos: ' + this.puntos);
+    }
+}    

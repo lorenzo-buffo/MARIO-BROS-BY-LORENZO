@@ -51,12 +51,16 @@ export class Preloader extends Scene
         this.load.image("Caparazon", "caparazon.png")
         this.load.image("Hongo", "Hongo.png")
         this.load.image("bloqueVacio", "bloqueVacio.png")
+        this.load.image("estrella", "estrella.png")
+        this.load.bitmapFont('superMarioFont', "SuperMario.ttf")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
-        this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 16 });
+        this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 32 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("koopa", "koopa.png" , { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("moneda", "moneda.png" , { frameWidth: 16, frameHeight: 16 });
     }
+    
 
     create ()
     {
@@ -128,6 +132,14 @@ export class Preloader extends Scene
             frames: this.anims.generateFrameNumbers('koopa', { start: 0, end: 1}), 
             frameRate: 12, 
             repeat: -1 
+        });
+
+        //agregar animacion de moneda
+        this.anims.create({
+            key: 'monedaGira',
+            frames: this.anims.generateFrameNumbers('moneda', { start: 0, end: 3}), 
+            frameRate: 1, 
+            repeat: 0 
         });
 
         this.scene.start('MainMenu');

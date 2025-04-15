@@ -31,7 +31,7 @@ export class Preloader extends Scene
     {
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
-        this.load.image('logo', 'logo.png');
+        this.load.image('LOGO', 'LOGO.png');
         this.load.image("cesped", "cesped.png");
         this.load.image("bloqueNormal", "bloque.png");
         this.load.image("tuboCorto", "tuboCorto.png");
@@ -52,6 +52,7 @@ export class Preloader extends Scene
         this.load.image("Hongo", "Hongo.png")
         this.load.image("bloqueVacio", "bloqueVacio.png")
         this.load.image("estrella", "estrella.png")
+        this.load.image("flor", "flor.png")
         this.load.bitmapFont('superMarioFont', "SuperMario.ttf")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
         this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 32 });
@@ -59,6 +60,8 @@ export class Preloader extends Scene
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("koopa", "koopa.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("moneda", "moneda.png" , { frameWidth: 16, frameHeight: 16 });
+        this.load.spritesheet("PersonajeFuego", "marioFuego.png" , { frameWidth: 18, frameHeight: 32 });
+        this.load.spritesheet("bolaFuego", "bolaFuego.png" , { frameWidth: 16, frameHeight: 8 });
     }
     
 
@@ -80,6 +83,15 @@ export class Preloader extends Scene
             repeat: -1 
         });
 
+        //Crear la animación de personaje grande
+        this.anims.create({
+            key: 'PersonajeFuego-camina',
+            frames: this.anims.generateFrameNumbers('PersonajeFuego', { start: 1, end: 3}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
+
+
         //animacion saltar
         this.anims.create({
             key: 'personaje-salta',
@@ -92,6 +104,14 @@ export class Preloader extends Scene
         this.anims.create({
             key: 'PersonajeGrande-salta',
             frames: [{ key: 'PersonajeGrande', frame: 5 }], 
+            frameRate: 1,  
+            repeat: 0
+        });
+
+        //animacion saltar
+        this.anims.create({
+            key: 'PersonajeFuego-salta',
+            frames: [{ key: 'PersonajeFuego', frame: 5 }], 
             frameRate: 1,  
             repeat: 0
         });
@@ -140,6 +160,14 @@ export class Preloader extends Scene
             frames: this.anims.generateFrameNumbers('moneda', { start: 0, end: 3}), 
             frameRate: 1, 
             repeat: 0 
+        });
+
+        //agregar animacion bola de fuego
+        this.anims.create({
+            key: 'BolaFuego',
+            frames: this.anims.generateFrameNumbers('bolaFuego', { start: 0, end: 1}), 
+            frameRate: 12, 
+            repeat: -1 
         });
 
         this.scene.start('MainMenu');

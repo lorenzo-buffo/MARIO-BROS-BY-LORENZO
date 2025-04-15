@@ -14,7 +14,6 @@ export class Game extends Scene {
     }
     this.posicionCastillo = 3820;
 }
-    
 
     create() {
         // Imágenes de fondo
@@ -196,7 +195,8 @@ export class Game extends Scene {
         // Cámara que sigue al jugador
         this.cameras.main.setBounds(0, 0, 3900, 244);
         this.cameras.main.startFollow(this.personaje);
-    
+
+        
         // Crear el bloque misterioso con la animación
         this.bloqueMisterioso = this.physics.add.staticGroup();
         this.bloqueMisterioso1 = this.bloqueMisterioso.create(330, 150, "bloqueMisterioso").play('bloqueMisteriosoAnim');
@@ -238,6 +238,7 @@ export class Game extends Scene {
             }
         });
         
+        
 
         // Crear bloque normal
         this.bloqueNormal = this.physics.add.staticGroup();
@@ -277,7 +278,7 @@ export class Game extends Scene {
         this.physics.add.collider(this.personaje, this.bloqueNormal, (personaje, bloque) => {
             this.hacerSaltarBloqueNormal(bloque);
         });
-
+         
         // Crear un grupo único para todos los tubos
         this.tubos = this.physics.add.staticGroup();
         this.tubos.create(560, 196, "tuboCorto")
@@ -329,18 +330,16 @@ export class Game extends Scene {
         this.physics.add.collider(this.koopa, this.cespedColision);
         this.physics.add.collider(this.personaje, this.koopa, this.hitKoopa, null, this);
         this.koopaActiva = false;
-        
-        //crear hongo
-        this.hongos = this.physics.add.group({
-            allowGravity: true,
-        });
-        this.physics.add.collider(this.hongos, this.cespedColision);
-        this.physics.add.collider(this.hongos, this.bloqueMisterioso);
-        this.physics.add.collider(this.hongos, this.bloqueNormal);
-        this.physics.add.collider(this.hongos, this.bloquesInmoviles);
-        this.physics.add.collider(this.hongos, this.bloquesVacios);
-        this.physics.add.collider(this.hongos, this.tubos);
 
+            //crear hongo
+            this.hongos = this.physics.add.group();
+            this.physics.add.collider(this.hongos, this.cespedColision);
+            this.physics.add.collider(this.hongos, this.bloqueMisterioso);
+            this.physics.add.collider(this.hongos, this.bloqueNormal);
+            this.physics.add.collider(this.hongos, this.bloquesInmoviles);
+            this.physics.add.collider(this.hongos, this.bloquesVacios);
+            this.physics.add.collider(this.hongos, this.tubos);
+        
         //crear estrellas
         this.estrellas = this.physics.add.group({
             allowGravity: true,
@@ -434,28 +433,34 @@ export class Game extends Scene {
         // Animación de caminar o quieto (solo si está en el suelo)
         if (this.personaje.body.touching.down) {
             if (this.velocidadActual !== 0) {
-                if (this.personaje.powerUp) {
-                    this.personaje.anims.play("PersonajeGrande-camina", true); // Animación normal de caminar
+                // Si se mové
+                if (this.personaje.powerUp === "flor") {
+                    this.personaje.anims.play("PersonajeFuego-camina", true);
+                } else if (this.personaje.powerUp) {
+                    this.personaje.anims.play("PersonajeGrande-camina", true);
                 } else {
                     this.personaje.anims.play("personaje-camina", true);
                 }
             } else {
                 // Cuando el personaje está quieto
                 this.personaje.anims.stop();
-                
-                if (this.personaje.powerUp) {
-                    // Mostrar solo el primer frame de la animación 'PersonajeGrande-camina'
-                    this.personaje.setTexture("PersonajeGrande", 0);  // Asegúrate de que el frame 0 se muestra
+                if (this.personaje.powerUp === "flor") {
+                    // Mostrar solo el primer frame de PersonajeFuego (asegurate de que el frame 0 es el idle)
+                    this.personaje.setTexture("PersonajeFuego", 0);
+                } else if (this.personaje.powerUp) {
+                    this.personaje.setTexture("PersonajeGrande", 0);
                 } else {
                     this.personaje.setTexture("personaje", 0);
                 }
             }                
         }
     
-        // Salto
+        // Salto: Inicio y prolongación del salto
         if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
             this.personaje.setVelocityY(-350);
-            if (this.personaje.powerUp) {
+            if (this.personaje.powerUp === "flor") {
+                this.personaje.anims.play("PersonajeFuego-salta", true);
+            } else if (this.personaje.powerUp) {
                 this.personaje.anims.play("PersonajeGrande-salta", true);
             } else {
                 this.personaje.anims.play("personaje-salta", true);
@@ -464,7 +469,9 @@ export class Game extends Scene {
             this.tiempoSalto = 0;
         } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
             this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
-            if (this.personaje.powerUp) {
+            if (this.personaje.powerUp === "flor") {
+                this.personaje.anims.play("PersonajeFuego-salta", true);
+            } else if (this.personaje.powerUp) {
                 this.personaje.anims.play("PersonajeGrande-salta", true);
             } else {
                 this.personaje.anims.play("personaje-salta", true);
@@ -477,28 +484,31 @@ export class Game extends Scene {
             this.estaSaltando = false;
         }
     
-        // Animación en el aire (por caída)
+        // Animación en el aire (por caída) si no se está saltando activamente
         if (!this.personaje.body.touching.down && !this.estaSaltando) {
-            if (this.personaje.powerUp) {
+            if (this.personaje.powerUp === "flor") {
+                this.personaje.anims.play("PersonajeFuego-salta", true);
+            } else if (this.personaje.powerUp) {
                 this.personaje.anims.play("PersonajeGrande-salta", true);
             } else {
                 this.personaje.anims.play("personaje-salta", true);
             }
         }
     
-       // Detectar muerte por caída
-       if (this.personaje.y > 230) {
-        this.personaje.isDead = true;
-        this.personaje.anims.play("personaje-muere", true);
-        this.personaje.setVelocity(0, -400);
+        // Detectar muerte por caída
+        if (this.personaje.y > 230) {
+            this.personaje.isDead = true;
+            this.personaje.anims.play("personaje-muere", true);
+            this.personaje.setVelocity(0, -400);
     
-        // Restar una vida cuando muere por caída
-        this.perderVida();  // Llamar a la función que resta vida
+            // Restar una vida cuando muere por caída
+            this.perderVida();  // Llamar a la función que resta vida
     
-        this.time.delayedCall(2000, () => {
-            this.scene.restart();  // Reiniciar la escena
-        });
-    }
+            this.time.delayedCall(2000, () => {
+                this.scene.restart();  // Reiniciar la escena
+            });
+        }
+    
         // Activar goombas
         this.goombas.children.iterate(goomba => {
             if (!goomba.activado && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, goomba.x, goomba.y) < 200) {
@@ -583,16 +593,38 @@ export class Game extends Scene {
             if (personaje.powerUp) {
                 personaje.powerUp = false;
                 personaje.invulnerable = true;
-                personaje.body.setSize(16, 16).setOffset(0, 0);
-                personaje.anims.play('personaje-camina', true);
-                console.log("El personaje perdió el poder del hongo");
-                this.pausarEnemigos();
+    
+                // Desactivar colisiones mientras se hace la transformación
+                personaje.body.enable = false;
+    
+                // Animación de transformación
+                this.tweens.add({
+                    targets: personaje,
+                    scaleX: 1.3,
+                    scaleY: 1.3,
+                    yoyo: true,
+                    repeat: 2,
+                    duration: 150,
+                    onComplete: () => {
+                        // Cambio de estado a personaje normal
+                        personaje.body.setSize(16, 16).setOffset(0, 0);
+                        personaje.anims.play('personaje-camina', true);  // Cambia la animación a caminar
+    
+                        // Resetear escala
+                        personaje.setScale(1);
+    
+                        // Habilitar las físicas nuevamente
+                        personaje.body.enable = true;
+    
+                        console.log("El personaje perdió el poder del hongo");
+                        this.pausarEnemigos();
+                    }
+                });
     
                 // Recuperar estado normal después de 1 segundo
                 this.time.delayedCall(1000, () => {
                     personaje.invulnerable = false;
                 });
-    
             } else {
                 this.morirPersonaje(personaje);
             }
@@ -666,22 +698,43 @@ export class Game extends Scene {
             if (personaje.powerUp) {
                 personaje.powerUp = false;
                 personaje.invulnerable = true;
-                personaje.body.setSize(16, 16).setOffset(0, 0);
-                personaje.anims.play('personaje-camina', true);
-                console.log("El personaje perdió el poder del hongo");
-                this.pausarEnemigos();
     
+                // Desactivar colisiones mientras se hace la transformación
+                personaje.body.enable = false;
+    
+                // Animación de transformación
+                this.tweens.add({
+                    targets: personaje,
+                    scaleX: 1.3,
+                    scaleY: 1.3,
+                    yoyo: true,
+                    repeat: 2,
+                    duration: 150,
+                    onComplete: () => {
+                        // Cambio de estado a personaje normal
+                        personaje.body.setSize(16, 16).setOffset(0, 0);
+                        personaje.anims.play('personaje-camina', true);  // Cambia la animación a caminar
+    
+                        // Resetear escala
+                        personaje.setScale(1);
+    
+                        // Habilitar las físicas nuevamente
+                        personaje.body.enable = true;
+    
+                        console.log("El personaje perdió el poder del hongo");
+                        this.pausarEnemigos();
+                    }
+                });
+    
+                // Recuperar estado normal después de 1 segundo
                 this.time.delayedCall(1000, () => {
                     personaje.invulnerable = false;
                 });
-    
             } else {
                 this.morirPersonaje(personaje);
             }
         }
     }
-    
-    
     
     
     rebotarGoomba(goomba, objeto) {
@@ -726,28 +779,32 @@ export class Game extends Scene {
     
     
 
-     pausarEnemigos() {
+    pausarEnemigos() {
         this.goombas.getChildren().forEach(goomba => {
-        goomba.body.oldVelocityX = goomba.body.velocity.x;
-        goomba.setVelocityX(0);
+            goomba.body.oldVelocityX = goomba.body.velocity.x;
+            goomba.setVelocityX(0);
+            goomba.body.moves = false;  // 👉 Bloquear movimiento físico
         });
-        
-        // Si tenés UN solo Koopa:
+    
         if (this.koopa && this.koopa.body) {
             this.koopa.body.oldVelocityX = this.koopa.body.velocity.x;
             this.koopa.setVelocityX(0);
-        
+            this.koopa.body.moves = false;
+    
             this.time.delayedCall(2000, () => {
+                this.koopa.body.moves = true;
                 this.koopa.setVelocityX(this.koopa.body.oldVelocityX);
             });
         }
-        
+    
         this.time.delayedCall(2000, () => {
             this.goombas.getChildren().forEach(goomba => {
-            goomba.setVelocityX(goomba.body.oldVelocityX);
+                goomba.body.moves = true;
+                goomba.setVelocityX(goomba.body.oldVelocityX);
             });
         });
     }
+    
         
         
     colisionCaparazon = () => {
@@ -949,10 +1006,10 @@ export class Game extends Scene {
                 }
             });
     
-        } else if (bloque === this.bloqueMisterioso2 || bloque === this.bloqueMisterioso5 || bloque === this.bloqueMisterioso9) {
-            // Generar hongo
+        } else if (bloque === this.bloqueMisterioso2 || bloque === this.bloqueMisterioso5) {
+            // Hongo normal
             const hongo = this.hongos.create(bloque.x, bloque.y - 1, "Hongo").setScale(0.8).setBounce(1, 0);
-    
+        
             this.tweens.add({
                 targets: hongo,
                 y: hongo.y - 1,
@@ -962,12 +1019,39 @@ export class Game extends Scene {
                     hongo.body.setVelocityX(80);
                 }
             });
-    
+        
             this.physics.add.collider(this.personaje, hongo, (personaje, objeto) => {
                 objeto.destroy();
                 console.log("¡Hongo recolectado!");
-                personaje.powerUp = true;
-                personaje.body.setSize(18, 32).setOffset(0, 0);
+            
+                // Desactivar colisiones momentáneamente
+                personaje.body.enable = false;
+            
+                // Tween de "transformación rápida" (agranda y achica 2 veces)
+                this.tweens.add({
+                    targets: personaje,
+                    scaleX: 1.3,
+                    scaleY: 1.3,
+                    yoyo: true,
+                    repeat: 2,
+                    duration: 150,
+                    onComplete: () => {
+                        // Cambiar estado a powerUp
+                        personaje.powerUp = true;
+            
+                        // Ajustar cuerpo y animación
+                        personaje.body.setSize(18, 32).setOffset(0, 0);
+                        personaje.anims.play('PersonajeGrande-camina');
+            
+                        // Resetear escala
+                        personaje.setScale(1);
+            
+                        // Volver a habilitar físicas
+                        personaje.body.enable = true;
+            
+                        console.log("¡El personaje se hizo grande!");
+                    }
+                });
             });
     
             this.physics.add.collider(hongo, this.tubos, () => {
@@ -982,7 +1066,106 @@ export class Game extends Scene {
             this.physics.add.collider(hongo, this.bloqueMisterioso, () => {
                 hongo.body.setVelocityX(-hongo.body.velocity.x);
             });
-    
+
+        } else if (bloque === this.bloqueMisterioso9) {
+            if (this.personaje.powerUp) {
+                // FLOR si el personaje es grande
+                const flor = this.physics.add.sprite(bloque.x, bloque.y - 16, "flor").setScale(0.9);
+                flor.body.setAllowGravity(false);  // Que no caiga
+                flor.body.setImmovable(true);      // Que no se mueva
+        
+                // Colisión con personaje
+                this.physics.add.overlap(this.personaje, flor, (personaje, objeto) => {
+                    objeto.destroy();
+                    console.log("¡Flor recolectada!");
+        
+                    personaje.body.enable = false;
+        
+                    // Tween de "poder"
+                    this.tweens.add({
+                        targets: personaje,
+                        scaleX: 1.3,
+                        scaleY: 1.3,
+                        yoyo: true,
+                        repeat: 2,
+                        duration: 150,
+                        onComplete: () => {
+                            personaje.powerUp = "flor";
+        
+                            personaje.body.setSize(18, 32).setOffset(0, 0);
+                            personaje.setTexture('PersonajeFuego');
+                            personaje.anims.play('PersonajeFuego-camina');
+        
+                            personaje.setScale(1);
+                            personaje.body.enable = true;
+        
+                            console.log("¡Ahora puede lanzar fuego!");
+                    // Aquí agregas la detección de la tecla:
+                            if (!this.teclaFuego) {
+                                this.teclaFuego = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+                                this.teclaFuego.on('down', () => { 
+                                    this.habilitarDisparoFuego();  
+                                });
+                            }
+                        }
+                    });
+                }); 
+             } else {
+                // HONGO si el personaje es chico
+                const hongo = this.hongos.create(bloque.x, bloque.y - 1, "Hongo").setScale(0.8).setBounce(1, 0);
+        
+                this.tweens.add({
+                    targets: hongo,
+                    y: hongo.y - 1,
+                    duration: 100,
+                    ease: 'Power1',
+                    onComplete: () => {
+                        hongo.body.setVelocityX(80);
+                    }
+                });
+        
+                this.physics.add.collider(this.personaje, hongo, (personaje, objeto) => {
+                    objeto.destroy();
+                    console.log("¡Hongo recolectado!");
+        
+                    personaje.body.enable = false;
+        
+                    // Tween de "agrandar"
+                    this.tweens.add({
+                        targets: personaje,
+                        scaleX: 1.3,
+                        scaleY: 1.3,
+                        yoyo: true,
+                        repeat: 2,
+                        duration: 150,
+                        onComplete: () => {
+                            personaje.powerUp = true;
+        
+                            personaje.body.setSize(18, 32).setOffset(0, 0);
+                            personaje.anims.play('personaje-grande-camina');
+        
+                            personaje.setScale(1);
+                            personaje.body.enable = true;
+        
+                            console.log("¡El personaje se hizo grande!");
+                        }
+                    });
+                });
+        
+                // colliders para el hongo
+                this.physics.add.collider(hongo, this.tubos, () => {
+                    hongo.body.setVelocityX(-hongo.body.velocity.x);
+                });
+                this.physics.add.collider(hongo, this.bloquesInmoviles, () => {
+                    hongo.body.setVelocityX(-hongo.body.velocity.x);
+                });
+                this.physics.add.collider(hongo, this.bloqueNormal, () => {
+                    hongo.body.setVelocityX(-hongo.body.velocity.x);
+                });
+                this.physics.add.collider(hongo, this.bloqueMisterioso, () => {
+                    hongo.body.setVelocityX(-hongo.body.velocity.x);
+                });
+            }
         } else {
             // Generar moneda
             const moneda = this.moneda.create(bloque.x, bloque.y - 1, "Moneda").setScale(0.8);
@@ -1019,8 +1202,95 @@ export class Game extends Scene {
                     });
                 }
             });
-        }
+        } 
     }
+
+    habilitarDisparoFuego = function() {
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (this.personaje.powerUp === "flor") {
+                const bolaFuego = this.physics.add.sprite(this.personaje.x, this.personaje.y - 10, 'BolaFuego')
+                    .setVelocityX(this.personaje.flipX ? -200 : 200);
+    
+                bolaFuego.body.setAllowGravity(false);
+                bolaFuego.anims.play('BolaFuego', true);
+                bolaFuego.setCollideWorldBounds(true);
+                bolaFuego.body.onWorldBounds = true;
+    
+                this.physics.world.on('worldbounds', function(body) {
+                    if (body.gameObject === bolaFuego) {
+                        bolaFuego.destroy();
+                    }
+                });
+    
+                // Colisiones con Goombas
+                this.physics.add.overlap(bolaFuego, this.goombas, (bola, goomba) => {
+                    goomba.anims.play("goomba-muerte", true);
+                    goomba.setVelocityX(0);
+                    bola.destroy();
+                    this.time.delayedCall(300, () => {
+                        goomba.destroy();
+                        this.sumarPuntos(100);
+                        let textoFlotante = this.add.text(goomba.x, goomba.y, '100', {
+                            font: '16px Arial',
+                            fill: '#ffffff',
+                            stroke: '#000000',
+                            strokeThickness: 2
+                        });
+                        this.tweens.add({
+                            targets: textoFlotante,
+                            y: goomba.y - 50,
+                            alpha: 0,
+                            duration: 1000,
+                            ease: 'Power1',
+                            onComplete: () => textoFlotante.destroy()
+                        });
+                    });
+                }, null, this);
+    
+                // Colisiones con Koopa
+                this.physics.add.overlap(bolaFuego, this.koopas, (bola, koopa) => {
+                    bola.destroy();
+                    koopa.destroy();
+                    this.sumarPuntos(100);
+                    let textoFlotante = this.add.text(koopa.x, koopa.y, '100', {
+                        font: '16px Arial',
+                        fill: '#ffffff',
+                        stroke: '#000000',
+                        strokeThickness: 2
+                    });
+                    this.tweens.add({
+                        targets: textoFlotante,
+                        y: koopa.y - 50,
+                        alpha: 0,
+                        duration: 1000,
+                        ease: 'Power1',
+                        onComplete: () => textoFlotante.destroy()
+                    });
+                }, null, this);
+    
+                this.physics.add.collider(bolaFuego, this.bloqueMisterioso, () => {
+                    bolaFuego.destroy();
+                }, null, this);
+    
+                this.physics.add.collider(bolaFuego, this.bloqueNormal, () => {
+                    bolaFuego.destroy();
+                }, null, this);
+    
+                this.physics.add.collider(bolaFuego, this.bloquesInmoviles, () => {
+                    bolaFuego.destroy();
+                }, null, this);
+    
+                this.physics.add.collider(bolaFuego, this.bloquesVacios, () => {
+                    bolaFuego.destroy();
+                }, null, this);
+    
+                this.physics.add.collider(bolaFuego, this.tubos, () => {
+                    bolaFuego.destroy();
+                }, null, this);
+            }
+        });
+    }
+    
     
     sumarPuntos(puntos) {
         this.puntos += puntos;
@@ -1035,10 +1305,6 @@ export class Game extends Scene {
         this.textoVidas.setText(`Vidas: ${vidas}`);
     
         if (vidas <= 0) {
-            // En lugar de reiniciar las vidas aquí, solo gestionamos la lógica de Game Over
-            // Ya no restamos vidas aquí si el jugador no tiene más.
         }
     }
-    
-}
-        
+}   

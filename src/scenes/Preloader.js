@@ -55,6 +55,8 @@ export class Preloader extends Scene
         this.load.image("bloqueVacio", "bloqueVacio.png")
         this.load.image("estrella", "estrella.png")
         this.load.image("flor", "flor.png")
+        this.load.image("lava", "lava.png")
+        this.load.image("puente", "puente.png")
         this.load.bitmapFont('superMarioFont', "SuperMario.ttf")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
         this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 32 });
@@ -117,6 +119,15 @@ export class Preloader extends Scene
             frameRate: 1,  
             repeat: 0
         });
+
+        //animacion agachado
+        this.anims.create({
+            key: 'PersonajeGrande-agachado',
+            frames: [{ key: 'PersonajeGrande', frame: 4 }], 
+            frameRate: 1,  
+            repeat: 0
+        });
+
 
     //animacion morir
     this.anims.create({

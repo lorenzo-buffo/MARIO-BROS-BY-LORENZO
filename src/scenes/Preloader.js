@@ -33,6 +33,8 @@ export class Preloader extends Scene
         this.load.setPath('assets');
         this.load.image('LOGO', 'LOGO.png');
         this.load.image("cesped", "cesped.png");
+        this.load.image("suelo", "suelo2.png");
+        this.load.image("suelo2", "suelo3.png");
         this.load.image("bloqueNormal", "bloque.png");
         this.load.image("tuboCorto", "tuboCorto.png");
         this.load.image("tuboMediano", "tuboMediano.png");

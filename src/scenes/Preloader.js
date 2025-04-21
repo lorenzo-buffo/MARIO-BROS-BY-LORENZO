@@ -58,7 +58,7 @@ export class Preloader extends Scene
         this.load.image("lava", "lava.png")
         this.load.image("puente", "puente.png")
         this.load.bitmapFont('superMarioFont', "SuperMario.ttf")
-        this.load.spritesheet("personaje", "mario.png" , { frameWidth: 18, frameHeight: 16 });
+        this.load.spritesheet("personaje", "mario.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 32 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});

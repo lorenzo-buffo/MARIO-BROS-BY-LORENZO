@@ -19,19 +19,49 @@ export class MainMenu extends Scene
         const border = this.add.rectangle(125, 70, logo.width * 0.1 + 4, logo.height * 0.1 + 4, 0x000000);
         border.setDepth(-1); // enviar al fondo
 
-        // Asegurar que el logo esté sobre el borde
-        logo.setDepth(1);
-        
-        this.add.text(120, 200, 'iniciar juego', {
+        logo.setDepth(1); // asegurar que el logo esté sobre el borde
+
+        // Botón Level 1
+        const level1 = this.add.text(125, 150, 'Level 1', {
             fontFamily: 'Arial Black', fontSize: 20, color: '#ffffff',
             stroke: '#000000', strokeThickness: 8,
             align: 'center'
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setInteractive();
 
-        this.input.once('pointerdown', () => {
+        level1.on('pointerdown', () => {
+            this.scene.start('Game');
+        });
 
+        // Botón Level 2
+        const level2 = this.add.text(125, 200, 'Level 2', {
+            fontFamily: 'Arial Black', fontSize: 20, color: '#ffffff',
+            stroke: '#000000', strokeThickness: 8,
+            align: 'center'
+        }).setOrigin(0.5).setInteractive();
+
+        level2.on('pointerdown', () => {
             this.scene.start('Game2');
+        });
 
+        // Efecto de escala al pasar el puntero
+        [level1, level2].forEach(button => {
+            button.on('pointerover', () => {
+                this.tweens.add({
+                    targets: button,
+                    scale: 1.2,
+                    duration: 150,
+                    ease: 'Power2'
+                });
+            });
+
+            button.on('pointerout', () => {
+                this.tweens.add({
+                    targets: button,
+                    scale: 1,
+                    duration: 150,
+                    ease: 'Power2'
+                });
+            });
         });
     }
 }

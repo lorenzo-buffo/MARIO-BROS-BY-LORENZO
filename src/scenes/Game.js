@@ -337,7 +337,6 @@ export class Game extends Scene {
             this.physics.add.collider(this.hongos, this.bloqueMisterioso);
             this.physics.add.collider(this.hongos, this.bloqueNormal);
             this.physics.add.collider(this.hongos, this.bloquesInmoviles);
-            this.physics.add.collider(this.hongos, this.bloquesVacios);
             this.physics.add.collider(this.hongos, this.tubos);
         
         //crear estrellas
@@ -530,7 +529,7 @@ export class Game extends Scene {
             }
         }
         if (this.personaje.x >= this.posicionCastillo) {
-            this.scene.start('MainMenu');
+            this.scene.start('GameOver');
         }
     }
     

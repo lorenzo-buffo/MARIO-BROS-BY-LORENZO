@@ -5,6 +5,9 @@ export class Game2 extends Scene {
         super('Game2');
     }
 
+    init(){
+    }
+
     create() {
 
         this.cameras.main.setBackgroundColor('#0a0a23'); 
@@ -37,7 +40,6 @@ export class Game2 extends Scene {
         this.suelo19 = this.add.tileSprite(2500, this.scale.height - 16, 186, 32, 'suelo');
         this.suelo20 = this.add.tileSprite(2379, this.scale.height - 36, 56, 72, 'suelo');
         this.suelo21 = this.add.tileSprite(2387, this.scale.height - 150, 40, 56, 'suelo');
-        this.sueloDestuctibe = this.add.tileSprite(2182, this.scale.height - 134, 116, 16, 'suelo');
         
 
         // Colisiones invisibles
@@ -65,6 +67,21 @@ export class Game2 extends Scene {
         this.sueloColision.create(2387, this.scale.height - 150, null).setSize(40, 56).setVisible(false);
         this.sueloColision.create(2235, this.scale.height - 64, null).setSize(231, 16).setVisible(false);
 
+        // Personaje
+        this.personaje = this.physics.add.sprite(10, 100, "PersonajeGrande").setGravityY(1300);
+        this.personaje.setCollideWorldBounds(true);
+        this.personaje.isDead = false;
+        this.velocidadActual = 0;
+        this.aceleracion = 3;
+        this.velocidadMaxima = 150;
+        this.frenado = 30;
+        this.estaSaltando = false;
+        this.tiempoSalto = 0;
+
+        this.physics.add.collider(this.personaje, this.sueloColision);
+     
+
+
         // Bloques individuales
         this.bloqueSueloIndividual = this.physics.add.staticGroup();
         this.bloqueSueloIndividual.create(8, 156, "suelo").refreshBody();
@@ -86,30 +103,26 @@ export class Game2 extends Scene {
         this.bloqueSueloIndividual.create(418, 124, "suelo").refreshBody();
         this.bloqueSueloIndividual.create(476, 156, "suelo").refreshBody();
         this.bloqueSueloIndividual.create(492, 156, "suelo").refreshBody();
-
+        this.physics.add.collider(this.personaje, this.bloqueSueloIndividual);
         this.bloqueMisterioso = this.physics.add.staticGroup();
-        this.bloqueMisterioso.create(401, 60 ,"bloqueMisterioso").play('bloqueMisteriosoAnim');
-
+        let bloque = this.bloqueMisterioso.create(401, 60, "bloqueMisterioso").play('bloqueMisteriosoAnim');
+        bloque.originalY = bloque.y;
+        
+        this.physics.add.collider(this.personaje, this.bloqueMisterioso, (personaje, bloque) => {
+            if (
+                personaje.body.top <= bloque.y + bloque.height / 2 &&
+                personaje.body.bottom > bloque.y - bloque.height / 2 &&
+                Math.abs(personaje.x - bloque.x) < bloque.width / 2
+            ) {
+                this.hacerSaltarBloque(bloque);
+            }
+        });
         this.bloqueInmovil = this.physics.add.staticGroup();
         this.bloqueInmovil.create(1620, 188 ,"bloqueVacio")
-
-
-        // Personaje
-        this.personaje = this.physics.add.sprite(10, 100, "PersonajeGrande").setGravityY(1300);
-        this.personaje.setCollideWorldBounds(true);
-        this.personaje.isDead = false;
-        this.velocidadActual = 0;
-        this.aceleracion = 3;
-        this.velocidadMaxima = 150;
-        this.frenado = 30;
-        this.estaSaltando = false;
-        this.tiempoSalto = 0;
-
-        this.physics.add.collider(this.personaje, this.sueloColision);
-        this.physics.add.collider(this.personaje, this.bloqueSueloIndividual);
-        this.physics.add.collider(this.personaje, this.bloqueMisterioso);
         this.physics.add.collider(this.personaje, this.bloqueInmovil);
 
+
+        
         //camara
    
         this.cameras.main.setBounds(0, 0, 2580, this.scale.height);
@@ -144,24 +157,15 @@ export class Game2 extends Scene {
             immovable: true
         });
 
-
         // Crear fuegos
-        const fuego1 = this.fuegos.create(280, 240, 'Fuego').setScale(0.1).refreshBody();
+        const fuego1 = this.fuegos.create(280, 240, 'Fuego').refreshBody();
         fuego1.originalY = fuego1.y;
-        const fuego2 = this.fuegos.create(540, 240, 'Fuego').setScale(0.1).refreshBody();
+        const fuego2 = this.fuegos.create(540, 240, 'Fuego').refreshBody();
         fuego2.originalY = fuego2.y;
 
         // Colisión con personaje que mata
         this.physics.add.overlap(this.personaje, this.fuegos, () => {
-            if (!this.personaje.isDead) {
-                this.personaje.isDead = true;
-                this.personaje.anims.play("personaje-muere", true);
-                this.personaje.setVelocity(0, -400);
-
-                this.time.delayedCall(2000, () => {
-                    this.scene.restart();  // Reiniciar escena
-                });
-            }
+            this.morirPersonaje();
         }, null, this);
 
         // Crear monedas
@@ -174,26 +178,78 @@ export class Game2 extends Scene {
         this.monedas.create(1640, 205, "monedaGrande").play('monedaGrande');
         // Colisión del personaje con las monedas
         this.physics.add.overlap(this.personaje, this.monedas, this.recolectarMoneda, null, this);
-    
-       this.palo = this.add.image(750,145, 'lineaFuego');
-       this.palo.setOrigin(0, 0); 
 
-       this.palo1 = this.add.image(850,90, 'lineaFuego');
-       this.palo1.setOrigin(0, 0); 
+        // Crear el grupo de colisiones
+        this.palos = this.physics.add.group({
+            allowGravity: false,
+            immovable: true
+        });
 
-       this.palo2 = this.add.image(950,145, 'lineaFuego');
-       this.palo2.setOrigin(0, 0); 
+        // Función para configurar cada palo con colisiones y parpadeo
+        function configurarPalo(x, y, originX, originY, index) {
+            // Crear el palo
+            const palo = this.palos.create(x, y, 'lineaFuego').setOrigin(originX, originY);
+            palo.body.setCircle(16); // Colisión circular inferior
+            palo.body.enable = true; // Colisión activa desde el inicio
 
-       this.palo3 = this.add.image(1100,145, 'lineaFuego');
-       this.palo3.setOrigin(0, 0); 
+            // Crear el segundo círculo de colisión (arriba)
+            const paloExtra = this.palos.create(x, y - 20, 'lineaFuego').setOrigin(originX, originY);
+            paloExtra.body.setCircle(16); // Colisión circular superior
+            paloExtra.body.enable = true; // Colisión activa desde el inicio
+            paloExtra.setVisible(false); // Hacer el círculo extra invisible
 
-       this.palo4 = this.add.image(1200,90, 'lineaFuego');
-       this.palo4.setOrigin(0, 0); 
+            // Crear la variable de Tween para el parpadeo
+            let parpadeoTween = null;
 
-       
-       this.palo5 = this.add.image(1395,175, 'lineaFuego');
-       this.palo5.setOrigin(0, 0); 
+            // Alternar colisión y efecto visual (parpadeo)
+            this.time.addEvent({
+                delay: 3000,  // 2 segundos
+                loop: true,
+                callback: () => {
+                    const activado = !palo.body.enable;
 
+                    // Alternar colisiones
+                    palo.body.enable = activado;
+                    paloExtra.body.enable = activado;
+
+                    if (!activado) {
+                        // Hacer parpadear la imagen del palo (la que está girando)
+                        if (parpadeoTween) {
+                            parpadeoTween.stop(); // Detener el parpadeo anterior si existe
+                        }
+
+                        parpadeoTween = this.tweens.add({
+                            targets: palo,
+                            alpha: { from: 0.2, to: 1 }, // Hacerla más tenue (0.3) o más visible (1)
+                            duration: 400,
+                            yoyo: true,  // Para que regrese a su opacidad original
+                            repeat: -1  // Repetir indefinidamente
+                        });
+                    } else {
+                        // Detener el parpadeo y restaurar la opacidad
+                        if (parpadeoTween) {
+                            parpadeoTween.stop();
+                            palo.setAlpha(1);  // Restaurar opacidad completa cuando la colisión está activa
+                        }
+                    }
+                }
+            });
+
+            return palo; // Devolver el palo para mantener acceso a él si es necesario
+        }
+
+        // Crear todos los palos
+        this.palo1 = configurarPalo.call(this, 750, 145, 0.5, 0.5, 1);
+        this.palo2 = configurarPalo.call(this, 850, 90,  0.5, 0.5, 2);
+        this.palo3 = configurarPalo.call(this, 950, 145,  0.5, 0.5, 3);
+        this.palo4 = configurarPalo.call(this, 1100, 145, 0.5, 0.5, 4);
+        this.palo5 = configurarPalo.call(this, 1200, 90,  0.5, 0.5, 5);
+        this.palo6 = configurarPalo.call(this, 1395, 175,  0.5, 0.5, 6);
+
+        this.physics.add.overlap(this.personaje, this.palos, () => {
+            this.morirPersonaje();
+        }, null, this);
+        
        
         //MENSAJE FINAL
        this.mensajeFinal = this.add.text(160, 100, '¡GRACIAS MARIO, PERO LA PRINCESA ESTA EN OTRO CASTILLO!', {
@@ -205,142 +261,195 @@ export class Game2 extends Scene {
       
     }).setOrigin(0.5).setScrollFactor(0).setVisible(false);
 
+  // Boss como sprite sin cuerpo físico
+this.boss = this.add.sprite(2350, 158, 'Boss')
+.setActive(false)
+.setVisible(false)
+.setOrigin(0.5, 0.5);
+
+// Vida y estado
+this.boss.vida = 5;
+this.bossActivo = false;
+this.bossMuerto = false;
+
+    this.bolasBoss = this.physics.add.group({
+        allowGravity: false
+    });
+    this.time.addEvent({
+        delay: 3000, // Cada 2 segundos
+        loop: true,
+        callback: () => {
+            if (this.bossActivo) {
+                this.lanzarBolaFuego();
+            }
+        }
+    });
+    this.physics.add.overlap(this.bolasBoss, this.personaje, this.morirPersonaje, null, this);
+    
+ 
+
 
         this.keys = this.input.keyboard.createCursorKeys();}
+        
 
-    update() {
-        if (this.personaje.isDead) return;
-    
-        // Comprobar si se está agachando
-        if (this.keys.down.isDown && this.personaje.body.touching.down) {
-            this.personaje.anims.play("PersonajeGrande-agachado", true);
-            this.personaje.body.setSize(16, 16);
-            this.personaje.body.offset.y = 16;  // Ajusta la posición si es necesario
-        } else {
-    
-            // Si ya no se presiona abajo y la caja sigue chica, restaurar tamaño
-            if (this.personaje.body.height !== 32) {
-                this.personaje.body.setSize(16, 32);
-                this.personaje.body.offset.y = 0;  // Restaurar posición si cambiaste antes
-            }
-    
-            // Movimiento horizontal
-            if (this.keys.right.isDown) {
-                this.velocidadActual = Math.min(this.velocidadActual + this.aceleracion, this.velocidadMaxima);
-                this.personaje.setVelocityX(this.velocidadActual);
-                this.personaje.flipX = false;
-            } else if (this.keys.left.isDown) {
-                this.velocidadActual = Math.max(this.velocidadActual - this.aceleracion, -this.velocidadMaxima);
-                this.personaje.setVelocityX(this.velocidadActual);
-                this.personaje.flipX = true;
-            } else {
-                if (this.velocidadActual > 0) {
-                    this.velocidadActual = Math.max(this.velocidadActual - this.frenado, 0);
-                } else if (this.velocidadActual < 0) {
-                    this.velocidadActual = Math.min(this.velocidadActual + this.frenado, 0);
-                }
-                this.personaje.setVelocityX(this.velocidadActual);
-            }
-    
-            // Animación de caminar o quieto (solo si está en el suelo)
-            if (this.personaje.body.touching.down) {
-                if (this.velocidadActual !== 0) {
-                    this.personaje.anims.play("PersonajeGrande-camina", true);
+        update() {
+            if (!this.personaje || !this.personaje.body || this.personaje.isDead) return;
+        
+            const esFuego = this.personaje.powerUp === "flor";
+        
+            if (this.keys.down.isDown && this.personaje.body.touching.down) {
+                if (esFuego) {
+                    this.personaje.anims.play("PersonajeFuego-agachado", true);
                 } else {
-                    this.personaje.anims.stop();
-                    this.personaje.setTexture("PersonajeGrande", 0);
-                }                
+                    this.personaje.anims.play("PersonajeGrande-agachado", true);
+                }
+                this.personaje.body.setSize(16, 16);
+                this.personaje.body.offset.y = 16;
+            } else {
+                if (this.personaje.body.height !== 32) {
+                    this.personaje.body.setSize(16, 32);
+                    this.personaje.body.offset.y = 0;
+                }
+        
+                if (this.keys.right.isDown) {
+                    this.velocidadActual = Math.min(this.velocidadActual + this.aceleracion, this.velocidadMaxima);
+                    this.personaje.setVelocityX(this.velocidadActual);
+                    this.personaje.flipX = false;
+                } else if (this.keys.left.isDown) {
+                    this.velocidadActual = Math.max(this.velocidadActual - this.aceleracion, -this.velocidadMaxima);
+                    this.personaje.setVelocityX(this.velocidadActual);
+                    this.personaje.flipX = true;
+                } else {
+                    if (this.velocidadActual > 0) {
+                        this.velocidadActual = Math.max(this.velocidadActual - this.frenado, 0);
+                    } else if (this.velocidadActual < 0) {
+                        this.velocidadActual = Math.min(this.velocidadActual + this.frenado, 0);
+                    }
+                    this.personaje.setVelocityX(this.velocidadActual);
+                }
+        
+                if (this.personaje.body.touching.down) {
+                    if (this.velocidadActual !== 0) {
+                        this.personaje.anims.play(esFuego ? "PersonajeFuego-camina" : "PersonajeGrande-camina", true);
+                    } else {
+                        this.personaje.anims.stop();
+                        this.personaje.setTexture(esFuego ? "PersonajeFuego" : "PersonajeGrande", 0);
+                    }
+                }
+        
+                if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
+                    this.personaje.setVelocityY(-350);
+                    this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
+                    this.estaSaltando = true;
+                    this.tiempoSalto = 0;
+                } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
+                    this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
+                    this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
+                    this.tiempoSalto++;
+                }
+        
+                if (this.keys.up.isUp) {
+                    this.estaSaltando = false;
+                }
+        
+                if (!this.personaje.body.touching.down && !this.estaSaltando) {
+                    this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
+                }
             }
-    
-            // Salto: Inicio y prolongación del salto
-            if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
-                this.personaje.setVelocityY(-350);
-                this.personaje.anims.play("PersonajeGrande-salta", true);
-                this.estaSaltando = true;
-                this.tiempoSalto = 0;
-            } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
-                this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
-                this.personaje.anims.play("PersonajeGrande-salta", true);
-                this.tiempoSalto++;
+        
+            if (this.personaje.y > 210) {
+                this.morirPersonaje();
             }
-    
-            // Soltar salto
-            if (this.keys.up.isUp) {
-                this.estaSaltando = false;
-            }
-    
-            // Animación en el aire (por caída) si no se está saltando activamente
-            if (!this.personaje.body.touching.down && !this.estaSaltando) {
-                this.personaje.anims.play("PersonajeGrande-salta", true);
-            }
-        }
-    
-        // Detectar muerte por caída
-        if (this.personaje.y > 210) {
-            this.personaje.isDead = true;
-            this.personaje.anims.play("personaje-muere", true);
-            this.personaje.setVelocity(0, -400);
-    
-            this.time.delayedCall(2000, () => {
-                this.scene.restart();  // Reiniciar la escena
+        
+            const tiempo = this.time.now * 0.001;
+            const amplitud = 90;
+        
+            this.plataformasMoviles.getChildren().forEach((plataforma, index) => {
+                const offset = index % 2 === 0 ? 0 : Math.PI;
+                const nuevaY = plataforma.originalY + Math.sin(tiempo + offset) * amplitud;
+                plataforma.setY(nuevaY);
+                plataforma.body.reset(plataforma.x, nuevaY);
             });
-        }
-
-        const tiempo = this.time.now * 0.001;
-        const amplitud = 100;
         
-        // Movimiento vertical alternado de plataformas
-        this.plataformasMoviles.getChildren().forEach((plataforma, index) => {
-            const offset = index % 2 === 0 ? 0 : Math.PI;
-            const nuevaY = plataforma.originalY + Math.sin(tiempo + offset) * amplitud;
-            plataforma.setY(nuevaY);
-            plataforma.body.reset(plataforma.x, nuevaY); // Actualiza el cuerpo físico
-        });
+            const amplitudHorizontal = 40;
+            const nuevaX = this.plataformaHorizontal.originalX + Math.sin(tiempo) * amplitudHorizontal;
+            this.plataformaHorizontal.setX(nuevaX);
+            this.plataformaHorizontal.body.reset(nuevaX, this.plataformaHorizontal.y);
         
-        // Movimiento horizontal de la plataforma
-        const amplitudHorizontal = 40;
-        const nuevaX = this.plataformaHorizontal.originalX + Math.sin(tiempo) * amplitudHorizontal;
-        this.plataformaHorizontal.setX(nuevaX);
-        this.plataformaHorizontal.body.reset(nuevaX, this.plataformaHorizontal.y);
-
-        //fuegos
-        const tiempoFuego = this.time.now * 0.003;
-        const amplitudFuego = 110;
-
-        this.fuegos.getChildren().forEach((fuego, index) => {
-            const offset = index % 2 === 0 ? 0 : Math.PI / 2;  // Puedes variar con más variedad
-            const nuevaY = fuego.originalY + Math.sin(tiempoFuego + offset) * amplitudFuego;
-            fuego.setY(nuevaY);
-            fuego.body.reset(fuego.x, nuevaY);
-            // Si va bajando: gira 180 grados, si va subiendo vuelve a normal.
-            const velocidad = Math.cos(this.time.now * 0.003 + offset);
-            fuego.setFlipY(velocidad < 0);  // Si la velocidad es negativa, está bajando.
-        });
-        this.palo.rotation += 0.025; 
-        this.palo1.rotation += 0.03; 
-        this.palo2.rotation += 0.02; 
-        this.palo3.rotation += 0.03; 
-        this.palo4.rotation += 0.02; 
-        this.palo5.rotation += 0.02; 
-
-        if (this.personaje.x >= 2500 && !this.finalAlcanzado) {
-            this.finalAlcanzado = true; // Evita que se ejecute varias veces
-            this.mostrarMensajeYGameOver();
+            const tiempoFuego = this.time.now * 0.003;
+            const amplitudFuego = 110;
+        
+            this.fuegos.getChildren().forEach((fuego, index) => {
+                const offset = index % 2 === 0 ? 0 : Math.PI / 2;
+                const nuevaY = fuego.originalY + Math.sin(tiempoFuego + offset) * amplitudFuego;
+                fuego.setY(nuevaY);
+                fuego.body.reset(fuego.x, nuevaY);
+                const velocidad = Math.cos(this.time.now * 0.003 + offset);
+                fuego.setFlipY(velocidad < 0);
+            });
+        
+            this.palo1.rotation += 0.025;
+            this.palo2.rotation += 0.03;
+            this.palo3.rotation += 0.02;
+            this.palo4.rotation += 0.03;
+            this.palo5.rotation += 0.02;
+            this.palo6.rotation += 0.02;
+        
+            if (this.personaje.x >= 2500 && !this.finalAlcanzado) {
+                this.finalAlcanzado = true;
+                this.mostrarMensajeYGameOver();
+            }
+        
+            const cam = this.cameras.main;
+            const mitadPantalla = cam.width / 2;
+        
+            if (this.personaje.body.velocity.x > 0 && this.personaje.x > cam.scrollX + mitadPantalla) {
+                cam.scrollX = this.personaje.x - mitadPantalla;
+            }
+        
+            if (this.personaje.x < cam.scrollX) {
+                this.personaje.x = cam.scrollX;
+                this.personaje.body.velocity.x = 0;
+            }
+        
+            // 💥 Aquí añadimos chequeo para evitar error si this.boss es null
+            if (!this.bossActivo && this.boss && this.boss.visible === false) {
+                const distancia = Phaser.Math.Distance.Between(
+                    this.personaje.x, this.personaje.y,
+                    this.boss.x, this.boss.y
+                );
+        
+                if (distancia <= 600) {
+                    this.activarBoss();
+                }
+            }
+        
+            if (this.bossActivo && this.boss) {
+                this.boss.x -= 0.1;
+            }
+        
+            if (this.boss && this.boss.active && this.bossActivo) {
+                if (this.proyectiles && this.proyectiles.children) {
+                    this.proyectiles.children.iterate((proyectil) => {
+                        if (proyectil && this.checkOverlap(proyectil, this.boss)) {
+                            proyectil.destroy();
+                            this.boss.vida -= 1;
+        
+                            if (this.boss.vida <= 0) {
+                                this.bossMuerto = true;
+                                this.boss.destroy();
+                                this.boss = null; // ✅ Esto ya previene futuros errores
+                            }
+                        }
+                    });
+                }
+        
+                if (!this.bossMuerto) {
+                    // Aquí podrías poner lógica de ataque del boss
+                }
+            }
         }
-        const cam = this.cameras.main;
-    const mitadPantalla = cam.width / 2;
-
-    // Solo mover la cámara si el personaje se mueve a la derecha y se pasa del centro
-    if (this.personaje.body.velocity.x > 0 && this.personaje.x > cam.scrollX + mitadPantalla) {
-        cam.scrollX = this.personaje.x - mitadPantalla;
-    }
-
-    // 🧱 LIMITE: Evitar que el personaje vaya más atrás que el borde izquierdo de la cámara
-    if (this.personaje.x < cam.scrollX) {
-        this.personaje.x = cam.scrollX;
-        this.personaje.body.velocity.x = 0;
-    }
-}
+        
     
     // Función que maneja la recolección de las monedas
     recolectarMoneda = (personaje, moneda) => {
@@ -357,4 +466,161 @@ export class Game2 extends Scene {
             this.scene.start('GameOver');
         });
     }
+
+    activarBoss() {
+        if (!this.boss || this.bossMuerto) return; // ahora sí funciona
+    
+        this.bossActivo = true;
+        this.boss.setActive(true);
+        this.boss.setVisible(true);
+        this.boss.anims.play('BossCamina', true);
+    
+        console.log('¡El boss ha despertado!');
+    }
+    
+    lanzarBolaFuego() {
+        if (!this.boss) return; // Evita errores si el boss fue destruido
+    
+        const bola = this.bolasBoss.create(this.boss.x - 20, this.boss.y, 'ataqueEnemigo');
+        bola.setVelocityX(-150); // Hacia la izquierda
+        bola.anims.play('BossAtaca', true);
+        console.log("ataques");
+    
+        bola.setCollideWorldBounds(true);
+        bola.body.onWorldBounds = true;
+        bola.body.world.on('worldbounds', function(body) {
+            if (body.gameObject === bola) {
+                bola.destroy();
+            }
+        });
+    }
+    
+morirPersonaje() {
+    if (this.personaje && !this.personaje.isDead) {
+        this.personaje.isDead = true;
+        this.personaje.anims.play("personaje-muere", true);
+        this.personaje.setVelocity(0, -400);
+
+        this.time.delayedCall(2000, () => {
+            this.scene.restart(); // Reiniciar la escena
+        });
+    }
+}
+
+hacerSaltarBloque = function(bloque) {
+    if (bloque.animando) return;
+
+    bloque.animando = true;
+
+    this.tweens.add({
+        targets: bloque,
+        y: bloque.originalY - 10,
+        duration: 100,
+        ease: 'Power1',
+        yoyo: true,
+        onComplete: () => {
+            bloque.animando = false;
+
+            // Llamar a la función generarObjeto al terminar la animación
+            this.generarObjeto(bloque.x, bloque.y);
+
+            // Convertir el bloque a un bloque dinámico y cambiar la textura
+            const nuevoBloque = this.physics.add.sprite(bloque.x, bloque.y, 'bloqueVacio');
+            nuevoBloque.setImmovable(true); // Para que no lo empujen fácilmente
+            nuevoBloque.body.allowGravity = false; // Que no caiga
+
+            // Opcional: mantener propiedades útiles
+            nuevoBloque.originalY = bloque.originalY;
+
+            // Eliminar el bloque viejo
+            bloque.destroy();
+
+            // Si lo necesitas, puedes agregarle colisión al nuevo bloque con el jugador
+            this.physics.add.collider(this.personaje, nuevoBloque);
+        }
+    });
+};
+
+
+
+
+generarObjeto = function(x, y) {
+    const flor = this.physics.add.sprite(x, y - 16, 'flor');
+
+    flor.body.setAllowGravity(false);
+    flor.setImmovable(true);
+    flor.setVelocity(0);
+
+    this.tweens.add({
+        targets: flor,
+        y: flor.y - 10,
+        duration: 200,
+        ease: 'Power1'
+    });
+
+    this.physics.add.overlap(this.personaje, flor, (personaje, flor) => {
+        flor.destroy();
+
+     
+        this.tweens.add({
+            targets: personaje,
+            scaleX: 1.3,
+            scaleY: 1.3,
+            yoyo: true,
+            repeat: 2,
+            duration: 150,
+            onComplete: () => {
+                personaje.powerUp = "flor";
+                personaje.puedeDisparar = true;
+        
+                personaje.body.setSize(18, 32).setOffset(0, 0);
+                personaje.setTexture('PersonajeFuego');
+                personaje.anims.play('PersonajeFuego-camina');
+        
+                personaje.setScale(1);
+                personaje.body.enable = true;
+        
+                console.log("¡Ahora puede lanzar fuego!");
+            }
+        });
+    }, null, this);
+    this.proyectiles = this.physics.add.group();
+
+this.input.keyboard.on('keydown-SPACE', () => {
+    if (this.personaje.puedeDisparar) {
+        this.dispararProyectil();
+    }
+});
+};
+
+dispararProyectil() {
+    const offset = this.personaje.flipX ? -10 : 10;
+    const x = this.personaje.x + offset;
+    const y = this.personaje.y;
+
+    const proyectil = this.proyectiles.create(x, y, 'bolaFuego');
+    proyectil.setVelocityX(this.personaje.flipX ? -300 : 300);
+    proyectil.setCollideWorldBounds(true);
+    proyectil.body.allowGravity = false;
+
+    proyectil.anims.play('BolaFuego', true); // 🌀 Aquí aplicamos la animación
+
+    // Girar si va hacia la izquierda
+    proyectil.flipX = this.personaje.flipX;
+
+    // Destruir al salir del mundo
+    proyectil.body.onWorldBounds = true;
+    proyectil.body.world.on('worldbounds', function(body) {
+        if (body.gameObject === proyectil) {
+            proyectil.destroy();
+        }
+    });
+}
+
+checkOverlap(spriteA, spriteB) {
+    const boundsA = spriteA.getBounds();
+    const boundsB = spriteB.getBounds();
+    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+}
+
 }

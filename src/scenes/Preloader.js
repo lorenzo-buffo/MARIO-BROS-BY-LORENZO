@@ -57,6 +57,7 @@ export class Preloader extends Scene
         this.load.image("flor", "flor.png")
         this.load.image("lava", "lava.png")
         this.load.image("puente", "puente.png")
+        this.load.image("bloqueDestructible", "bloqueDestructible.png")
         this.load.image("Fuego", "Fuego.png")
         this.load.image("lineaFuego", "lineaFuego.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 16, frameHeight: 16 });
@@ -68,6 +69,8 @@ export class Preloader extends Scene
         this.load.spritesheet("PersonajeFuego", "marioFuego.png" , { frameWidth: 18, frameHeight: 32 });
         this.load.spritesheet("bolaFuego", "bolaFuego.png" , { frameWidth: 8, frameHeight: 8 });
         this.load.spritesheet("monedaGrande", "monedaGrande.png" , { frameWidth: 10, frameHeight: 13 });
+        this.load.spritesheet("Boss", "boss.png" , { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("ataqueEnemigo", "ataqueEnemigo.png" , { frameWidth: 27, frameHeight: 8 });
         
     }
     
@@ -130,7 +133,14 @@ export class Preloader extends Scene
             frameRate: 1,  
             repeat: 0
         });
-
+        
+          //animacion agachado
+          this.anims.create({
+            key: 'PersonajeFuego-agachado',
+            frames: [{ key: 'PersonajeFuego', frame: 4 }], 
+            frameRate: 1,  
+            repeat: 0
+        });
 
     //animacion morir
     this.anims.create({
@@ -193,6 +203,23 @@ export class Preloader extends Scene
             frameRate: 12, 
             repeat: -1 
         });
+
+         // Crear la animación de boss
+         this.anims.create({
+            key: 'BossCamina',
+            frames: this.anims.generateFrameNumbers('Boss', { start: 0, end: 3}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
+
+        // Crear la animación de ataque boss
+        this.anims.create({
+            key: 'BossAtaca',
+            frames: this.anims.generateFrameNumbers('ataqueEnemigo', { start: 0, end: 1}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
+
 
         this.scene.start('MainMenu');
     }

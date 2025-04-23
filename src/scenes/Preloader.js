@@ -57,7 +57,8 @@ export class Preloader extends Scene
         this.load.image("flor", "flor.png")
         this.load.image("lava", "lava.png")
         this.load.image("puente", "puente.png")
-        this.load.bitmapFont('superMarioFont', "SuperMario.ttf")
+        this.load.image("Fuego", "Fuego.png")
+        this.load.image("lineaFuego", "lineaFuego.png")
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 32 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
@@ -65,7 +66,9 @@ export class Preloader extends Scene
         this.load.spritesheet("koopa", "koopa.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("moneda", "moneda.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("PersonajeFuego", "marioFuego.png" , { frameWidth: 18, frameHeight: 32 });
-        this.load.spritesheet("bolaFuego", "bolaFuego.png" , { frameWidth: 16, frameHeight: 8 });
+        this.load.spritesheet("bolaFuego", "bolaFuego.png" , { frameWidth: 8, frameHeight: 8 });
+        this.load.spritesheet("monedaGrande", "monedaGrande.png" , { frameWidth: 10, frameHeight: 13 });
+        
     }
     
 
@@ -179,6 +182,14 @@ export class Preloader extends Scene
         this.anims.create({
             key: 'BolaFuego',
             frames: this.anims.generateFrameNumbers('bolaFuego', { start: 0, end: 1}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
+
+        // Crear la animación de personaje
+        this.anims.create({
+            key: 'monedaGrande',
+            frames: this.anims.generateFrameNumbers('monedaGrande', { start: 0, end: 2}), 
             frameRate: 12, 
             repeat: -1 
         });

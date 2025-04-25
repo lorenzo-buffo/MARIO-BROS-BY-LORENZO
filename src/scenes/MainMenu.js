@@ -30,6 +30,7 @@ export class MainMenu extends Scene
 
         level1.on('pointerdown', () => {
             this.scene.start('Game');
+            this.registry.set('vidas', 3);
         });
 
         // Botón Level 2
@@ -41,6 +42,7 @@ export class MainMenu extends Scene
 
         level2.on('pointerdown', () => {
             this.scene.start('Game2');
+            this.registry.set('vidas', 3);
         });
 
         // Efecto de escala al pasar el puntero

@@ -31,6 +31,16 @@ export class Preloader extends Scene
     {
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
+        this.load.audio("SonidoMoneda", "monedaSound.mp3");
+        this.load.audio("SonidoSalto", "saltoSound.mp3");
+        this.load.audio("SonidoHongo", "hongoSound.mp3");
+        this.load.audio("SonidoGenerarHongo", "GeneraHongoSound.mp3");
+        this.load.audio("SonidoHitGoomba", "hitGoombaSound.wav");
+        this.load.audio("SonidoHit", "hitSound.mp3");
+        this.load.audio("SonidoDead", "deadSound.wav");
+        this.load.audio("SonidoFlor", "florSound.wav");
+        this.load.audio("MusicaEstrella", "musicaEstrella.mp3");
+        this.load.audio("RomperBloqueSonido", "RomperBloqueSound.wav");
         this.load.image('LOGO', 'LOGO.png');
         this.load.image("cesped", "cesped.png");
         this.load.image("suelo", "suelo2.png");

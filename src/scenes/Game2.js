@@ -18,6 +18,14 @@ export class Game2 extends Scene {
 
     create() {
 
+        //SONIDOS
+        this.sonidoMoneda = this.sound.add('SonidoMoneda')
+        this.sonidoSalto = this.sound.add('SonidoSalto')
+        this.sonidoRomperBloque = this.sound.add('RomperBloqueSonido')
+        this.sonidoDead = this.sound.add('SonidoDead')
+        this.sonidoHongo = this.sound.add('SonidoHongo')
+        this.sonidoFlor = this.sound.add('SonidoFlor')
+        //SONIDOS
         this.cameras.main.setBackgroundColor('#0a0a23'); 
 
         this.lava1 = this.add.tileSprite(400, this.scale.height - 10, 350, 50, 'lava');
@@ -323,7 +331,7 @@ this.bossMuerto = false;
             }
         }
     });
-    this.physics.add.overlap(this.bolasBoss, this.personaje, this.morirPersonaje, null, this);
+    //this.physics.add.overlap(this.bolasBoss, this.personaje, this.morirPersonaje, null, this);
 
      // texto y puntos
      this.textoPuntos = this.add.text(10, 10, 'Puntos: 0', {
@@ -431,6 +439,7 @@ this.bossMuerto = false;
                     this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
                     this.estaSaltando = true;
                     this.tiempoSalto = 0;
+                    this.sonidoSalto.play();
                 } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
                     this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
                     this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
@@ -558,10 +567,13 @@ this.bossMuerto = false;
     
     // Función que maneja la recolección de las monedas
     recolectarMoneda = (personaje, moneda) => {
-        moneda.disableBody(true, true);  // Desactiva la moneda (la hace invisible y no interactiva)
-        this.contadorMonedas += 1;      // Incrementa el contador de monedas
-        console.log("Monedas recolectadas: " + this.contadorMonedas);  // Muestra en consola el contador
+        moneda.disableBody(true, true);  // Desactiva la moneda
+        this.contadorMonedas += 1;      // Incrementa el contador
+        console.log("Monedas recolectadas: " + this.contadorMonedas);
+    
+        this.sonidoMoneda.play();       // 🔊 Reproduce el sonido
     };
+    
 
     mostrarMensajeYGameOver() {
         this.mensajeFinal.setVisible(true);
@@ -604,6 +616,7 @@ this.bossMuerto = false;
         if (this.personaje && !this.personaje.isDead) {
             this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);
+            this.sonidoDead.play()
             this.personaje.setVelocity(0, -400);
     
             // Obtener vidas actuales y restar 1
@@ -613,7 +626,7 @@ this.bossMuerto = false;
             // Actualizar texto en pantalla
             this.textoVidas.setText('Vidas: ' + vidas);
     
-            this.time.delayedCall(2000, () => {
+            this.time.delayedCall(2500, () => {
                 if (vidas <= 0) {
                     this.scene.start('GameOver'); // Ir a la escena GameOver
                 } else {
@@ -651,6 +664,7 @@ hacerSaltarBloque = function(bloque) {
             } else {
                 // Si es destructible, solo destruirlo después del salto
                 bloque.destroy();
+                this.sonidoRomperBloque.play()
             }
         }
     });
@@ -658,6 +672,7 @@ hacerSaltarBloque = function(bloque) {
 
 generarObjeto = function(x, y) {
     const flor = this.physics.add.sprite(x, y - 16, 'flor');
+    this.sonidoFlor.play()
 
     flor.body.setAllowGravity(false);
     flor.setImmovable(true);
@@ -672,6 +687,7 @@ generarObjeto = function(x, y) {
 
     this.physics.add.overlap(this.personaje, flor, (personaje, flor) => {
         flor.destroy();
+        this.sonidoHongo.play();
 
      
     this.tweens.add({

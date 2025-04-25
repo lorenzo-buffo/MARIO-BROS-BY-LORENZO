@@ -18,6 +18,20 @@ export class Game extends Scene {
 }
 
     create() {
+
+        //SONIDOS
+        this.sonidoMoneda = this.sound.add('SonidoMoneda')
+        this.sonidoSalto = this.sound.add('SonidoSalto')
+        this.sonidoHongo = this.sound.add('SonidoHongo')
+        this.sonidoHit = this.sound.add('SonidoHit')
+        this.sonidoHitGoomba = this.sound.add('SonidoHitGoomba')
+        this.sonidoGeneraHongo = this.sound.add('SonidoGenerarHongo')
+        this.sonidoRomperBloque = this.sound.add('RomperBloqueSonido')
+        this.sonidoDead = this.sound.add('SonidoDead')
+        this.sonidoFlor = this.sound.add('SonidoFlor')
+        this.MusicaEstrella = this.sound.add('MusicaEstrella')
+        //SONIDOS
+
         // Imágenes de fondo
         this.add.image(2790, 186, "MontañaGrande").setScale(0.7);
         this.add.image(2645, 200, "ArbustoMediano").setScale(0.7);
@@ -468,6 +482,7 @@ export class Game extends Scene {
             }
             this.estaSaltando = true;
             this.tiempoSalto = 0;
+            this.sonidoSalto.play();
         } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
             this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
             if (this.personaje.powerUp === "flor") {
@@ -501,6 +516,10 @@ export class Game extends Scene {
             this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);
             this.personaje.setVelocity(0, -400);
+            this.sonidoDead.play()
+            this.MusicaEstrella.stop()
+
+            
     
             // Restar una vida cuando muere por caída
             this.perderVida();  // Llamar a la función que resta vida
@@ -575,6 +594,7 @@ export class Game extends Scene {
         } 
         else if (personaje.body.touching.down && goombas.body.touching.up) {
             goombas.anims.play("goomba-muerte", true);
+            this.sonidoHitGoomba.play()
             goombas.setVelocityX(0);
             setTimeout(() => {
                 goombas.destroy();
@@ -608,6 +628,7 @@ export class Game extends Scene {
     
                 // Desactivar colisiones mientras se hace la transformación
                 personaje.body.enable = false;
+                this.sonidoHit.play()
     
                 // Animación de transformación
                 this.tweens.add({
@@ -617,6 +638,7 @@ export class Game extends Scene {
                     yoyo: true,
                     repeat: 2,
                     duration: 150,
+                    
                     onComplete: () => {
                         // Cambio de estado a personaje normal
                         personaje.body.setSize(16, 16).setOffset(0, 0);
@@ -691,7 +713,7 @@ export class Game extends Scene {
             });
     
             personaje.setVelocityY(-350);
-    
+            this.sonidoHitGoomba.play()
             this.caparazon = this.physics.add.sprite(koopa.x, koopa.y, 'Caparazon').setCollideWorldBounds(true);
             this.caparazon.body.setVelocityX(0);
             this.caparazon.moverCaparazon = false;
@@ -713,7 +735,7 @@ export class Game extends Scene {
     
                 // Desactivar colisiones mientras se hace la transformación
                 personaje.body.enable = false;
-    
+                this.sonidoHit.play()
                 // Animación de transformación
                 this.tweens.add({
                     targets: personaje,
@@ -763,7 +785,7 @@ export class Game extends Scene {
     morirPersonaje(personaje) {
         personaje.isDead = true;
         personaje.anims.play("personaje-muere", true);
-    
+        this.sonidoDead.play()
         // Desactivar las colisiones mientras dura la animación de muerte
         personaje.body.checkCollision.none = true;
         
@@ -782,7 +804,7 @@ export class Game extends Scene {
             
         } else {
             // Si aún quedan vidas, reiniciar la escena
-            this.time.delayedCall(2000, () => {
+            this.time.delayedCall(2500, () => {
                 personaje.body.checkCollision.none = false; // Reactivar las colisiones
                 this.scene.restart(); // Reiniciar la escena
             });
@@ -917,6 +939,7 @@ export class Game extends Scene {
                     // Si el personaje es grande, destruimos el bloque
                     if (this.personaje.powerUp) {
                         bloque.destroy();
+                        this.sonidoRomperBloque.play()
                         console.log("¡Bloque destruido!");
                     } else {
                         // Vuelve el bloque a su posición original
@@ -946,14 +969,17 @@ export class Game extends Scene {
                 .setBounce(0.8, 0.8)
                 .setCollideWorldBounds(true)
                 .setGravityY(300);
+                this.sonidoGeneraHongo.play()
         
             estrella.body.setVelocityX(80);
             estrella.body.setVelocityY(-50);
         
             this.physics.add.overlap(this.personaje, estrella, (personaje, estrella) => {
+                this.sonidoHongo.play();
                 estrella.destroy();
                 console.log("¡Estrella recolectada!");
                 personaje.invencible = true;
+                this.MusicaEstrella.play()
         
                 personaje.setTint(0x00ff00);
                 let intervalId = this.time.addEvent({
@@ -967,7 +993,7 @@ export class Game extends Scene {
                     loop: true
                 });
         
-                this.time.delayedCall(10000, () => {
+                this.time.delayedCall(11000, () => {
                     personaje.invencible = false;
                     personaje.clearTint();
                     intervalId.remove();
@@ -1021,6 +1047,7 @@ export class Game extends Scene {
         } else if (bloque === this.bloqueMisterioso2 || bloque === this.bloqueMisterioso5) {
             // Hongo normal
             const hongo = this.hongos.create(bloque.x, bloque.y - 1, "Hongo").setScale(0.8).setBounce(1, 0);
+            this.sonidoGeneraHongo.play()
         
             this.tweens.add({
                 targets: hongo,
@@ -1034,6 +1061,7 @@ export class Game extends Scene {
         
             this.physics.add.collider(this.personaje, hongo, (personaje, objeto) => {
                 objeto.destroy();
+                this.sonidoHongo.play();
                 console.log("¡Hongo recolectado!");
             
                 // Desactivar colisiones momentáneamente
@@ -1083,12 +1111,14 @@ export class Game extends Scene {
             if (this.personaje.powerUp) {
                 // FLOR si el personaje es grande
                 const flor = this.physics.add.sprite(bloque.x, bloque.y - 16, "flor").setScale(0.9);
+                this.sonidoFlor.play()
                 flor.body.setAllowGravity(false);  // Que no caiga
                 flor.body.setImmovable(true);      // Que no se mueva
         
                 // Colisión con personaje
                 this.physics.add.overlap(this.personaje, flor, (personaje, objeto) => {
                     objeto.destroy();
+                    this.sonidoHongo.play();
                     console.log("¡Flor recolectada!");
         
                     personaje.body.enable = false;
@@ -1125,7 +1155,7 @@ export class Game extends Scene {
              } else {
                 // HONGO si el personaje es chico
                 const hongo = this.hongos.create(bloque.x, bloque.y - 1, "Hongo").setScale(0.8).setBounce(1, 0);
-        
+                this.sonidoGeneraHongo.play()
                 this.tweens.add({
                     targets: hongo,
                     y: hongo.y - 1,
@@ -1182,6 +1212,7 @@ export class Game extends Scene {
             // Generar moneda
             const moneda = this.moneda.create(bloque.x, bloque.y - 1, "Moneda").setScale(0.8);
             moneda.anims.play('monedaGira', true);
+            this.sonidoMoneda.play();  
     
             this.tweens.add({
                 targets: moneda,

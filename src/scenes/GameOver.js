@@ -9,8 +9,9 @@ export class GameOver extends Scene
 
     create ()
     {
+        this.musicaGameOver = this.sound.add('musicaGameOver')
         this.cameras.main.setBackgroundColor(0xff0000);
-
+        this.musicaGameOver.play()
         this.add.image(512, 384, 'background').setAlpha(0.5);
 
         this.add.text(120, 100, 'Game Over', {

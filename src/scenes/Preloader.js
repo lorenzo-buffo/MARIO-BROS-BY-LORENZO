@@ -39,7 +39,15 @@ export class Preloader extends Scene
         this.load.audio("SonidoHit", "hitSound.mp3");
         this.load.audio("SonidoDead", "deadSound.wav");
         this.load.audio("SonidoFlor", "florSound.wav");
+        this.load.audio("SonidoProyectil", "proyectilSound.wav");
+        this.load.audio("SonidoAtaqueBoss", "ataqueBossSound.wav");
+        this.load.audio("SonidoDeadBoss", "bossMuereSound.wav");
         this.load.audio("MusicaEstrella", "musicaEstrella.mp3");
+        this.load.audio("musicaGameOver", "musicaGameOver.wav");
+        this.load.audio("MusicaNivel1", "MusicaNivel1.mp3");
+        this.load.audio("MusicaNivel2", "MusicaNivel2.mp3");
+        this.load.audio("MusicaWin1", "MusicaWin1.wav");
+        this.load.audio("MusicaWin2", "MusicaWin2.wav");
         this.load.audio("RomperBloqueSonido", "RomperBloqueSound.wav");
         this.load.image('LOGO', 'LOGO.png');
         this.load.image("cesped", "cesped.png");

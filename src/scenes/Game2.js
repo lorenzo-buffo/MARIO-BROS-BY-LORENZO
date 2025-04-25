@@ -25,7 +25,14 @@ export class Game2 extends Scene {
         this.sonidoDead = this.sound.add('SonidoDead')
         this.sonidoHongo = this.sound.add('SonidoHongo')
         this.sonidoFlor = this.sound.add('SonidoFlor')
+        this.sonidoProyectil = this.sound.add('SonidoProyectil')
+        this.sonidoAtaqueBoss = this.sound.add('SonidoAtaqueBoss')
+        this.sonidoMuereBoss = this.sound.add('SonidoDeadBoss')
+        this.MusicaNivel2 = this.sound.add('MusicaNivel2')
+        this.MusicaWin2 = this.sound.add('MusicaWin2')
         //SONIDOS
+        this.MusicaNivel2.play({ loop: true });
+
         this.cameras.main.setBackgroundColor('#0a0a23'); 
 
         this.lava1 = this.add.tileSprite(400, this.scale.height - 10, 350, 50, 'lava');
@@ -323,7 +330,7 @@ this.bossMuerto = false;
         allowGravity: false
     });
     this.time.addEvent({
-        delay: 2000, // Cada 2 segundos
+        delay: 3000, // Cada 2 segundos
         loop: true,
         callback: () => {
             if (this.bossActivo) {
@@ -533,6 +540,7 @@ this.bossMuerto = false;
                                 const y = this.boss.y;
                             
                                 this.boss.destroy();
+                                this.sonidoMuereBoss.play()
                                 this.boss = null;
                             
                                 this.puntos += 5000;
@@ -561,6 +569,10 @@ this.bossMuerto = false;
                 if (!this.bossMuerto) {
                     // Aquí podrías poner lógica de ataque del boss
                 }
+            }
+            if (this.personaje.x >= 2350 && this.MusicaNivel2.isPlaying) {
+                this.MusicaNivel2.stop();
+                this.MusicaWin2.play();
             }
         }
         
@@ -601,6 +613,7 @@ this.bossMuerto = false;
         const bola = this.bolasBoss.create(this.boss.x - 20, this.boss.y, 'ataqueEnemigo');
         bola.setVelocityX(-150); // Hacia la izquierda
         bola.anims.play('BossAtaca', true);
+        this.sonidoAtaqueBoss.play()
         console.log("ataques");
     
         bola.setCollideWorldBounds(true);
@@ -616,8 +629,12 @@ this.bossMuerto = false;
         if (this.personaje && !this.personaje.isDead) {
             this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);
-            this.sonidoDead.play()
+            this.sonidoDead.play();
+            this.MusicaNivel2.stop();
             this.personaje.setVelocity(0, -400);
+    
+            // 🔒 Desactivar colisiones
+            this.personaje.body.checkCollision.none = true;
     
             // Obtener vidas actuales y restar 1
             let vidas = this.registry.get('vidas') - 1;
@@ -730,6 +747,7 @@ dispararProyectil() {
     proyectil.setVelocityX(this.personaje.flipX ? -300 : 300);
     proyectil.setCollideWorldBounds(true);
     proyectil.body.allowGravity = false;
+    this.sonidoProyectil.play()
 
     proyectil.anims.play('BolaFuego', true); // 🌀 Aquí aplicamos la animación
 

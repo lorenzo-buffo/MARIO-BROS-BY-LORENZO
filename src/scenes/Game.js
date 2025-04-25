@@ -14,7 +14,6 @@ export class Game extends Scene {
     if (this.registry.get('vidas') === undefined) {
         this.registry.set('vidas', 3);
     }
-    this.posicionCastillo = 3820;
 }
 
     create() {
@@ -30,7 +29,11 @@ export class Game extends Scene {
         this.sonidoDead = this.sound.add('SonidoDead')
         this.sonidoFlor = this.sound.add('SonidoFlor')
         this.MusicaEstrella = this.sound.add('MusicaEstrella')
+        this.MusicaNivel1 = this.sound.add('MusicaNivel1')
+        this.MusicaWin1 = this.sound.add('MusicaWin1')
+        this.sonidoProyectil = this.sound.add('SonidoProyectil')
         //SONIDOS
+        this.MusicaNivel1.play({ loop: true });
 
         // Imágenes de fondo
         this.add.image(2790, 186, "MontañaGrande").setScale(0.7);
@@ -518,6 +521,7 @@ export class Game extends Scene {
             this.personaje.setVelocity(0, -400);
             this.sonidoDead.play()
             this.MusicaEstrella.stop()
+            this.MusicaNivel1.stop();
 
             
     
@@ -549,9 +553,6 @@ export class Game extends Scene {
                 this.koopaActiva = true;
             }
         }
-        if (this.personaje.x >= this.posicionCastillo) {
-            this.scene.start('GameOver');
-        }
         const cam = this.cameras.main;
         const mitadPantalla = cam.width / 2;
     
@@ -562,6 +563,14 @@ export class Game extends Scene {
         if (this.personaje.x < cam.scrollX) {
             this.personaje.x = cam.scrollX;
             this.personaje.body.velocity.x = 0;
+        }
+        if (this.personaje.x >= 3700 && this.MusicaNivel1.isPlaying) {
+            this.MusicaNivel1.stop();
+            this.MusicaWin1.play();
+        
+            this.MusicaWin1.once('complete', () => {
+                this.scene.start('MainMenu');
+            });
         }
     }
     
@@ -781,37 +790,30 @@ export class Game extends Scene {
         }
     }
     
-
     morirPersonaje(personaje) {
         personaje.isDead = true;
         personaje.anims.play("personaje-muere", true);
-        this.sonidoDead.play()
-        // Desactivar las colisiones mientras dura la animación de muerte
+        this.sonidoDead.play();
+        this.MusicaNivel1.stop();
         personaje.body.checkCollision.none = true;
-        
-        // Detener el movimiento del personaje durante la muerte
         personaje.setVelocity(0, -400);
     
-        // Restar una vida
-        this.perderVida();
+        // Restar una vida usando el registro
+        let vidasActuales = this.registry.get('vidas') || 0;
+        vidasActuales--;
+        this.registry.set('vidas', vidasActuales);
+        console.log("Vidas restantes:", vidasActuales);
     
-        // Verificar si es la última vida después de restar la vida
-        if (this.registry.get('vidas') <= 0) {
-            // Si es la última vida, después de la animación de muerte, se va a Game Over
-           
-                this.registry.set('vidas', 3); // Restablecer las 3 vidas
-                this.scene.start('GameOver'); // Iniciar la escena de Game Over
-            
-        } else {
-            // Si aún quedan vidas, reiniciar la escena
-            this.time.delayedCall(2500, () => {
-                personaje.body.checkCollision.none = false; // Reactivar las colisiones
-                this.scene.restart(); // Reiniciar la escena
-            });
-        }
+        this.time.delayedCall(2500, () => {
+            console.log("Vidas en delayedCall:", this.registry.get('vidas'));
+            if (this.registry.get('vidas') <= 0) {
+                console.log("Game Over");
+                this.scene.start('GameOver');
+            } else {
+                this.scene.restart();
+            }
+        });
     }
-    
-    
 
     pausarEnemigos() {
         this.goombas.getChildren().forEach(goomba => {
@@ -980,6 +982,7 @@ export class Game extends Scene {
                 console.log("¡Estrella recolectada!");
                 personaje.invencible = true;
                 this.MusicaEstrella.play()
+                this.MusicaNivel1.stop();
         
                 personaje.setTint(0x00ff00);
                 let intervalId = this.time.addEvent({
@@ -997,6 +1000,7 @@ export class Game extends Scene {
                     personaje.invencible = false;
                     personaje.clearTint();
                     intervalId.remove();
+                    this.MusicaNivel1.play();
                 });
             });
     
@@ -1253,6 +1257,7 @@ export class Game extends Scene {
             if (this.personaje.powerUp === "flor") {
                 const bolaFuego = this.physics.add.sprite(this.personaje.x, this.personaje.y - 10, 'BolaFuego')
                     .setVelocityX(this.personaje.flipX ? -200 : 200);
+                    this.sonidoProyectil.play()
     
                 bolaFuego.body.setAllowGravity(false);
                 bolaFuego.anims.play('BolaFuego', true);

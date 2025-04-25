@@ -1,5 +1,7 @@
 import { Scene } from 'phaser';
 
+
+
 export class Game extends Scene {
     constructor() {
         super('Game');
@@ -191,10 +193,9 @@ export class Game extends Scene {
 
         // Límites del mundo
         this.physics.world.setBounds(0, 0, 3900, 244);
-
         // Cámara que sigue al jugador
         this.cameras.main.setBounds(0, 0, 3900, 244);
-        this.cameras.main.startFollow(this.personaje);
+      
 
         
         // Crear el bloque misterioso con la animación
@@ -403,11 +404,12 @@ export class Game extends Scene {
         stroke: '#000000',
         strokeThickness: 2
     });
-    this.textoVidas.setScrollFactor(0);  // No hacer scroll con la cámara
+    this.textoVidas.setScrollFactor(0);  // No hacer scroll con la cámar
 
     }
 
     update() {
+        
         // No permitir movimiento si está muerto
         if (this.personaje.isDead) return;
     
@@ -530,6 +532,17 @@ export class Game extends Scene {
         }
         if (this.personaje.x >= this.posicionCastillo) {
             this.scene.start('GameOver');
+        }
+        const cam = this.cameras.main;
+        const mitadPantalla = cam.width / 2;
+    
+        if (this.personaje.body.velocity.x > 0 && this.personaje.x > cam.scrollX + mitadPantalla) {
+            cam.scrollX = this.personaje.x - mitadPantalla;
+        }
+    
+        if (this.personaje.x < cam.scrollX) {
+            this.personaje.x = cam.scrollX;
+            this.personaje.body.velocity.x = 0;
         }
     }
     

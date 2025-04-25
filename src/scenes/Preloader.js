@@ -57,9 +57,11 @@ export class Preloader extends Scene
         this.load.image("flor", "flor.png")
         this.load.image("lava", "lava.png")
         this.load.image("puente", "puente.png")
-        this.load.image("bloqueDestructible", "bloqueDestructible.png")
+        this.load.image("bloqueDestructible", "bloqueDestuctible.png")
         this.load.image("Fuego", "Fuego.png")
-        this.load.image("lineaFuego", "lineaFuego.png")
+        this.load.image("plataformaMovil", "plataformaMovil.png")
+        this.load.image("hongoBueno", "hongoBueno.png")
+        this.load.spritesheet('lineaFuego', 'lineaFuego.png', { frameWidth: 16, frameHeight: 48 });
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 32 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
@@ -220,6 +222,13 @@ export class Preloader extends Scene
             repeat: -1 
         });
 
+         // Crear LINEA FUEGO
+         this.anims.create({
+            key: 'lineaFuegoActiva',
+            frames: this.anims.generateFrameNumbers('lineaFuego', { start: 0, end: 1}), 
+            frameRate: 12, 
+            repeat: -1 
+        });
 
         this.scene.start('MainMenu');
     }

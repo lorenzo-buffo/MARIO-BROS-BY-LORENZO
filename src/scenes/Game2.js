@@ -1,11 +1,19 @@
 import { Scene } from 'phaser';
 
+
+
 export class Game2 extends Scene {
     constructor() {
         super('Game2');
     }
 
     init(){
+        this.puntos = 0;
+        this.tiempoRestante = 180;
+        // Solo establecer vidas en 3 si no existen aún
+    if (this.registry.get('vidas') === undefined) {
+        this.registry.set('vidas', 3);
+    }
     }
 
     create() {
@@ -67,6 +75,11 @@ export class Game2 extends Scene {
         this.sueloColision.create(2387, this.scale.height - 150, null).setSize(40, 56).setVisible(false);
         this.sueloColision.create(2235, this.scale.height - 64, null).setSize(231, 16).setVisible(false);
 
+
+
+        //hongo bueno
+        this.add.image(2500,200, "hongoBueno")
+
         // Personaje
         this.personaje = this.physics.add.sprite(10, 100, "PersonajeGrande").setGravityY(1300);
         this.personaje.setCollideWorldBounds(true);
@@ -79,6 +92,25 @@ export class Game2 extends Scene {
         this.tiempoSalto = 0;
 
         this.physics.add.collider(this.personaje, this.sueloColision);
+
+        this.bloqueDestructible = this.physics.add.staticGroup();
+        let posicionesX = [2132, 2148, 2164, 2180, 2196, 2212, 2228];
+        
+        posicionesX.forEach(x => {
+            let bloque = this.bloqueDestructible.create(x, 110, "bloqueDestructible");
+            bloque.originalY = bloque.y; // Necesario para que suba
+        });
+        
+        this.physics.add.collider(this.personaje, this.bloqueDestructible, (personaje, bloque) => {
+            if (
+                personaje.body.top <= bloque.y + bloque.height / 2 &&
+                personaje.body.bottom > bloque.y - bloque.height / 2 &&
+                Math.abs(personaje.x - bloque.x) < bloque.width / 2
+            ) {
+                this.hacerSaltarBloque(bloque);
+            }
+        });
+       
      
 
 
@@ -104,6 +136,7 @@ export class Game2 extends Scene {
         this.bloqueSueloIndividual.create(476, 156, "suelo").refreshBody();
         this.bloqueSueloIndividual.create(492, 156, "suelo").refreshBody();
         this.physics.add.collider(this.personaje, this.bloqueSueloIndividual);
+
         this.bloqueMisterioso = this.physics.add.staticGroup();
         let bloque = this.bloqueMisterioso.create(401, 60, "bloqueMisterioso").play('bloqueMisteriosoAnim');
         bloque.originalY = bloque.y;
@@ -117,6 +150,7 @@ export class Game2 extends Scene {
                 this.hacerSaltarBloque(bloque);
             }
         });
+
         this.bloqueInmovil = this.physics.add.staticGroup();
         this.bloqueInmovil.create(1620, 188 ,"bloqueVacio")
         this.physics.add.collider(this.personaje, this.bloqueInmovil);
@@ -134,8 +168,8 @@ export class Game2 extends Scene {
             immovable: true
         });
 
-        const plataforma1 = this.plataformasMoviles.create(1270, 130, 'suelo').setScale(2, 0.5).refreshBody();
-        const plataforma2 = this.plataformasMoviles.create(1350, 130, 'suelo').setScale(2, 0.5).refreshBody();
+        const plataforma1 = this.plataformasMoviles.create(1270, 130, 'plataformaMovil').refreshBody();
+        const plataforma2 = this.plataformasMoviles.create(1350, 130, 'plataformaMovil').refreshBody();
 
         plataforma1.originalY = plataforma1.y;
         plataforma2.originalY = plataforma2.y;
@@ -143,7 +177,7 @@ export class Game2 extends Scene {
         this.physics.add.collider(this.personaje, this.plataformasMoviles);
 
         // Plataforma móvil horizontal
-        this.plataformaHorizontal = this.physics.add.image(2290, 110, 'suelo').setScale(2, 0.5).refreshBody();
+        this.plataformaHorizontal = this.physics.add.image(2290, 110, 'plataformaMovil').refreshBody();
         this.plataformaHorizontal.setImmovable(true);
         this.plataformaHorizontal.body.allowGravity = false;
         this.plataformaHorizontal.originalX = this.plataformaHorizontal.x;
@@ -179,76 +213,81 @@ export class Game2 extends Scene {
         // Colisión del personaje con las monedas
         this.physics.add.overlap(this.personaje, this.monedas, this.recolectarMoneda, null, this);
 
-        // Crear el grupo de colisiones
-        this.palos = this.physics.add.group({
-            allowGravity: false,
-            immovable: true
-        });
+        // Crear el grupo de palos (sin colisiones circulares)
+this.palos = this.physics.add.group({
+    allowGravity: false,
+    immovable: true
+});
 
-        // Función para configurar cada palo con colisiones y parpadeo
-        function configurarPalo(x, y, originX, originY, index) {
-            // Crear el palo
-            const palo = this.palos.create(x, y, 'lineaFuego').setOrigin(originX, originY);
-            palo.body.setCircle(16); // Colisión circular inferior
-            palo.body.enable = true; // Colisión activa desde el inicio
+// Función para configurar cada palo con parpadeo y animación
+function configurarPalo(x, y, originX, originY, index) {
+    // Crear el palo (sin colisión circular)
+    const palo = this.palos.create(x - 20, y, 'lineaFuego').setOrigin(originX, originY);
 
-            // Crear el segundo círculo de colisión (arriba)
-            const paloExtra = this.palos.create(x, y - 20, 'lineaFuego').setOrigin(originX, originY);
-            paloExtra.body.setCircle(16); // Colisión circular superior
-            paloExtra.body.enable = true; // Colisión activa desde el inicio
-            paloExtra.setVisible(false); // Hacer el círculo extra invisible
+    // Reproducir la animación 'lineaFuegoActiva' en el palo
+    palo.anims.play('lineaFuegoActiva', true);  // Reproducir la animación en bucle
 
-            // Crear la variable de Tween para el parpadeo
-            let parpadeoTween = null;
+    // Crear la variable de Tween para el parpadeo
+    let parpadeoTween = null;
+    let colisionHabilitada = true;  // Variable para controlar la colisión
 
-            // Alternar colisión y efecto visual (parpadeo)
-            this.time.addEvent({
-                delay: 3000,  // 2 segundos
-                loop: true,
-                callback: () => {
-                    const activado = !palo.body.enable;
+    // Alternar el parpadeo visual y la colisión
+    this.time.addEvent({
+        delay: 3000,  // 3 segundos
+        loop: true,
+        callback: () => {
+            // Alternar colisión
+            colisionHabilitada = !colisionHabilitada;
 
-                    // Alternar colisiones
-                    palo.body.enable = activado;
-                    paloExtra.body.enable = activado;
-
-                    if (!activado) {
-                        // Hacer parpadear la imagen del palo (la que está girando)
-                        if (parpadeoTween) {
-                            parpadeoTween.stop(); // Detener el parpadeo anterior si existe
-                        }
-
-                        parpadeoTween = this.tweens.add({
-                            targets: palo,
-                            alpha: { from: 0.2, to: 1 }, // Hacerla más tenue (0.3) o más visible (1)
-                            duration: 400,
-                            yoyo: true,  // Para que regrese a su opacidad original
-                            repeat: -1  // Repetir indefinidamente
-                        });
-                    } else {
-                        // Detener el parpadeo y restaurar la opacidad
-                        if (parpadeoTween) {
-                            parpadeoTween.stop();
-                            palo.setAlpha(1);  // Restaurar opacidad completa cuando la colisión está activa
-                        }
-                    }
+            if (colisionHabilitada) {
+                // Restaurar la visibilidad y permitir colisiones
+                if (parpadeoTween) {
+                    parpadeoTween.stop(); // Detener el parpadeo anterior si existe
                 }
-            });
+                palo.setAlpha(1); // Restaurar visibilidad completa
+            } else {
+                // Hacer parpadear la imagen del palo (la que está girando)
+                if (parpadeoTween) {
+                    parpadeoTween.stop(); // Detener el parpadeo anterior si existe
+                }
 
-            return palo; // Devolver el palo para mantener acceso a él si es necesario
+                // Crear nuevo parpadeo para el palo
+                parpadeoTween = this.tweens.add({
+                    targets: palo,
+                    alpha: { from: 0.2, to: 2 }, // Hacerla más tenue (0.2) o más visible (1)
+                    duration: 400,
+                    yoyo: true,  // Para que regrese a su opacidad original
+                    repeat: -1  // Repetir indefinidamente
+                });
+            }
+
+            // Desactivar colisiones cuando está titilando
+            palo.body.enable = colisionHabilitada;
         }
+    });
 
-        // Crear todos los palos
-        this.palo1 = configurarPalo.call(this, 750, 145, 0.5, 0.5, 1);
-        this.palo2 = configurarPalo.call(this, 850, 90,  0.5, 0.5, 2);
-        this.palo3 = configurarPalo.call(this, 950, 145,  0.5, 0.5, 3);
-        this.palo4 = configurarPalo.call(this, 1100, 145, 0.5, 0.5, 4);
-        this.palo5 = configurarPalo.call(this, 1200, 90,  0.5, 0.5, 5);
-        this.palo6 = configurarPalo.call(this, 1395, 175,  0.5, 0.5, 6);
+    return palo; // Devolver el palo para mantener acceso a él si es necesario
+}
 
-        this.physics.add.overlap(this.personaje, this.palos, () => {
-            this.morirPersonaje();
-        }, null, this);
+// Crear todos los palos (ahora con animación activa)
+this.palo1 = configurarPalo.call(this, 750, 161);
+this.palo2 = configurarPalo.call(this, 850, 101);
+this.palo2 = configurarPalo.call(this, 1050, 101);
+this.palo3 = configurarPalo.call(this, 950, 161);
+this.palo4 = configurarPalo.call(this, 1100, 161);
+this.palo5 = configurarPalo.call(this, 1200, 101);
+this.palo6 = configurarPalo.call(this, 1440, 101);
+
+// Colisión entre el personaje y los palos (llamar a morirPersonaje si colisiona)
+this.physics.add.overlap(this.personaje, this.palos, () => {
+    // Verificar si la colisión está activada para el palo antes de ejecutar morirPersonaje
+    if (this.palos.children.iterate((palo) => palo.body.enable)) {
+        this.morirPersonaje();
+    }
+}, null, this);
+
+
+
         
        
         //MENSAJE FINAL
@@ -276,7 +315,7 @@ this.bossMuerto = false;
         allowGravity: false
     });
     this.time.addEvent({
-        delay: 3000, // Cada 2 segundos
+        delay: 2000, // Cada 2 segundos
         loop: true,
         callback: () => {
             if (this.bossActivo) {
@@ -285,6 +324,51 @@ this.bossMuerto = false;
         }
     });
     this.physics.add.overlap(this.bolasBoss, this.personaje, this.morirPersonaje, null, this);
+
+     // texto y puntos
+     this.textoPuntos = this.add.text(10, 10, 'Puntos: 0', {
+        font: '14px Arial',
+        fill: '#ffffff',
+        stroke: '#000000',         // Color del borde (negro)
+        strokeThickness: 2         // Grosor del borde
+    });
+    this.textoPuntos.setScrollFactor(0);
+
+    this.textoTemporizador = this.add.text(170, 10, 'Tiempo: 3:00', {
+        font: '14px Arial',
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2         // Grosor del borde
+    });
+    this.textoTemporizador.setScrollFactor(0);
+    this.timerEvento = this.time.addEvent({
+        delay: 1000, // cada 1 segundo
+        callback: () => {
+            this.tiempoRestante--;
+
+            // Formatear minutos y segundos
+            let minutos = Math.floor(this.tiempoRestante / 60);
+            let segundos = this.tiempoRestante % 60;
+
+            this.textoTemporizador.setText('Tiempo: ' + minutos + ':' + (segundos < 10 ? '0' + segundos : segundos));
+
+            if (this.tiempoRestante <= 0) {
+                this.timerEvento.remove();  // Parar el temporizador
+                this.scene.start('GameOver');  // Cambiar a la escena GameOver
+            }
+        },
+        callbackScope: this,
+        loop: true
+    });
+
+     // Crear texto de vidas en pantalla, accediendo al valor correcto desde el registro
+     this.textoVidas = this.add.text(100, 10, 'Vidas: ' + this.registry.get('vidas'), {
+        font: '14px Arial',
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2
+    });
+    this.textoVidas.setScrollFactor(0);  // No hacer scroll con la cámar
     
  
 
@@ -292,10 +376,15 @@ this.bossMuerto = false;
         this.keys = this.input.keyboard.createCursorKeys();}
         
 
+        
+        
+
         update() {
+           
             if (!this.personaje || !this.personaje.body || this.personaje.isDead) return;
         
             const esFuego = this.personaje.powerUp === "flor";
+            
         
             if (this.keys.down.isDown && this.personaje.body.touching.down) {
                 if (esFuego) {
@@ -388,13 +477,6 @@ this.bossMuerto = false;
                 fuego.setFlipY(velocidad < 0);
             });
         
-            this.palo1.rotation += 0.025;
-            this.palo2.rotation += 0.03;
-            this.palo3.rotation += 0.02;
-            this.palo4.rotation += 0.03;
-            this.palo5.rotation += 0.02;
-            this.palo6.rotation += 0.02;
-        
             if (this.personaje.x >= 2500 && !this.finalAlcanzado) {
                 this.finalAlcanzado = true;
                 this.mostrarMensajeYGameOver();
@@ -437,8 +519,31 @@ this.bossMuerto = false;
         
                             if (this.boss.vida <= 0) {
                                 this.bossMuerto = true;
+                            
+                                const x = this.boss.x;
+                                const y = this.boss.y;
+                            
                                 this.boss.destroy();
-                                this.boss = null; // ✅ Esto ya previene futuros errores
+                                this.boss = null;
+                            
+                                this.puntos += 5000;
+                                this.textoPuntos.setText('Puntos: ' + this.puntos);
+                            
+                                let textoFlotante = this.add.text(x, y, '5000', {
+                                    font: '16px Arial',
+                                    fill: '#ffffff',
+                                    stroke: '#000000',
+                                    strokeThickness: 2
+                                }).setOrigin(0.5);
+                            
+                                this.tweens.add({
+                                    targets: textoFlotante,
+                                    y: y - 50,
+                                    alpha: 0,
+                                    duration: 1000,
+                                    ease: 'Power1',
+                                    onComplete: () => textoFlotante.destroy()
+                                });
                             }
                         }
                     });
@@ -495,17 +600,29 @@ this.bossMuerto = false;
         });
     }
     
-morirPersonaje() {
-    if (this.personaje && !this.personaje.isDead) {
-        this.personaje.isDead = true;
-        this.personaje.anims.play("personaje-muere", true);
-        this.personaje.setVelocity(0, -400);
-
-        this.time.delayedCall(2000, () => {
-            this.scene.restart(); // Reiniciar la escena
-        });
+    morirPersonaje() {
+        if (this.personaje && !this.personaje.isDead) {
+            this.personaje.isDead = true;
+            this.personaje.anims.play("personaje-muere", true);
+            this.personaje.setVelocity(0, -400);
+    
+            // Obtener vidas actuales y restar 1
+            let vidas = this.registry.get('vidas') - 1;
+            this.registry.set('vidas', vidas);
+    
+            // Actualizar texto en pantalla
+            this.textoVidas.setText('Vidas: ' + vidas);
+    
+            this.time.delayedCall(2000, () => {
+                if (vidas <= 0) {
+                    this.scene.start('GameOver'); // Ir a la escena GameOver
+                } else {
+                    this.scene.restart(); // Reiniciar escena actual
+                }
+            });
+        }
     }
-}
+    
 
 hacerSaltarBloque = function(bloque) {
     if (bloque.animando) return;
@@ -521,28 +638,23 @@ hacerSaltarBloque = function(bloque) {
         onComplete: () => {
             bloque.animando = false;
 
-            // Llamar a la función generarObjeto al terminar la animación
-            this.generarObjeto(bloque.x, bloque.y);
+            // Solo llamar a generarObjeto si NO es un bloque destructible
+            if (bloque.texture.key !== 'bloqueDestructible') {
+                this.generarObjeto(bloque.x, bloque.y);
 
-            // Convertir el bloque a un bloque dinámico y cambiar la textura
-            const nuevoBloque = this.physics.add.sprite(bloque.x, bloque.y, 'bloqueVacio');
-            nuevoBloque.setImmovable(true); // Para que no lo empujen fácilmente
-            nuevoBloque.body.allowGravity = false; // Que no caiga
-
-            // Opcional: mantener propiedades útiles
-            nuevoBloque.originalY = bloque.originalY;
-
-            // Eliminar el bloque viejo
-            bloque.destroy();
-
-            // Si lo necesitas, puedes agregarle colisión al nuevo bloque con el jugador
-            this.physics.add.collider(this.personaje, nuevoBloque);
+                const nuevoBloque = this.physics.add.sprite(bloque.x, bloque.y, 'bloqueVacio');
+                nuevoBloque.setImmovable(true);
+                nuevoBloque.body.allowGravity = false;
+                nuevoBloque.originalY = bloque.originalY;
+                bloque.destroy();
+                this.physics.add.collider(this.personaje, nuevoBloque);
+            } else {
+                // Si es destructible, solo destruirlo después del salto
+                bloque.destroy();
+            }
         }
     });
 };
-
-
-
 
 generarObjeto = function(x, y) {
     const flor = this.physics.add.sprite(x, y - 16, 'flor');
@@ -562,8 +674,8 @@ generarObjeto = function(x, y) {
         flor.destroy();
 
      
-        this.tweens.add({
-            targets: personaje,
+    this.tweens.add({
+        targets: personaje,
             scaleX: 1.3,
             scaleY: 1.3,
             yoyo: true,
@@ -622,5 +734,4 @@ checkOverlap(spriteA, spriteB) {
     const boundsB = spriteB.getBounds();
     return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
 }
-
 }

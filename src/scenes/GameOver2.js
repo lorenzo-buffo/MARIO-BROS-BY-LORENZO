@@ -1,10 +1,10 @@
 import { Scene } from 'phaser';
 
-export class GameOver extends Scene
+export class GameOver2 extends Scene
 {
     constructor ()
     {
-        super('GameOver');
+        super('GameOver2');
     }
 
     create ()
@@ -24,7 +24,7 @@ export class GameOver extends Scene
         const resetButton = this.add.image(50, 200, 'restart').setOrigin(0.5).setScale(0.5).setInteractive();
 
         resetButton.on('pointerdown', () => {
-            this.scene.start('Game');  // <- Esto reinicia la escena 'Game'
+            this.scene.start('Game2');  // <- Esto reinicia la escena 'Game'
         });
 
         // Agrandar al pasar el mouse

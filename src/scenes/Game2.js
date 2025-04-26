@@ -645,7 +645,7 @@ this.bossMuerto = false;
     
             this.time.delayedCall(2500, () => {
                 if (vidas <= 0) {
-                    this.scene.start('GameOver'); // Ir a la escena GameOver
+                    this.scene.start('GameOver2'); // Ir a la escena GameOver
                 } else {
                     this.scene.restart(); // Reiniciar escena actual
                 }

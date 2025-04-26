@@ -49,9 +49,11 @@ export class Preloader extends Scene
         this.load.audio("MusicaWin1", "MusicaWin1.wav");
         this.load.audio("MusicaWin2", "MusicaWin2.wav");
         this.load.audio("RomperBloqueSonido", "RomperBloqueSound.wav");
-        this.load.image('LOGO', 'LOGO.png');
+        this.load.image('menuFondo', 'menuFondo.png');
         this.load.image("cesped", "cesped.png");
         this.load.image("suelo", "suelo2.png");
+        this.load.image("restart", "restart.png");
+        this.load.image("exit", "exit.png");
         this.load.image("suelo2", "suelo3.png");
         this.load.image("bloqueNormal", "bloque.png");
         this.load.image("tuboCorto", "tuboCorto.png");

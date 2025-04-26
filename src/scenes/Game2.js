@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-
+import { InputManager } from '../components/InputManager.js';
 
 
 export class Game2 extends Scene {
@@ -14,9 +14,14 @@ export class Game2 extends Scene {
     if (this.registry.get('vidas') === undefined) {
         this.registry.set('vidas', 3);
     }
+    this.ultimoDisparo = 0; // ⏳ Guardará el tiempo del último disparo
+this.cooldownDisparo = 300; // 300 milisegundos de espera entre disparos
     }
 
     create() {
+
+        this.inputManager = new InputManager(this);
+        this.inputManager.setup();
 
         //SONIDOS
         this.sonidoMoneda = this.sound.add('SonidoMoneda')
@@ -400,38 +405,38 @@ this.bossMuerto = false;
         
             const esFuego = this.personaje.powerUp === "flor";
             
-        
-            if (this.keys.down.isDown && this.personaje.body.touching.down) {
-                if (esFuego) {
-                    this.personaje.anims.play("PersonajeFuego-agachado", true);
-                } else {
-                    this.personaje.anims.play("PersonajeGrande-agachado", true);
+            this.inputManager.update(); // Actualiza el estado del gamepad
+
+            const movimiento = this.inputManager.getMovement(); // 💥 ACÁ DEFINIMOS movimiento
+            
+            // Disparo con cooldown
+            if (this.inputManager.pad?.buttons[2]?.pressed && this.personaje.puedeDisparar) {
+                const ahora = this.time.now;
+                if (ahora - this.ultimoDisparo >= this.cooldownDisparo) {
+                    this.dispararProyectil();
+                    this.ultimoDisparo = ahora;
                 }
-                this.personaje.body.setSize(16, 16);
-                this.personaje.body.offset.y = 16;
+            }
+            
+            // Ahora sí podés usar movimiento para mover el personaje
+            if (movimiento.x > 0) {
+                this.velocidadActual = Math.min(this.velocidadActual + this.aceleracion, this.velocidadMaxima);
+                this.personaje.setVelocityX(this.velocidadActual);
+                this.personaje.flipX = false;
+            } else if (movimiento.x < 0) {
+                this.velocidadActual = Math.max(this.velocidadActual - this.aceleracion, -this.velocidadMaxima);
+                this.personaje.setVelocityX(this.velocidadActual);
+                this.personaje.flipX = true;
             } else {
-                if (this.personaje.body.height !== 32) {
-                    this.personaje.body.setSize(16, 32);
-                    this.personaje.body.offset.y = 0;
+                if (this.velocidadActual > 0) {
+                    this.velocidadActual = Math.max(this.velocidadActual - this.frenado, 0);
+                } else if (this.velocidadActual < 0) {
+                    this.velocidadActual = Math.min(this.velocidadActual + this.frenado, 0);
                 }
-        
-                if (this.keys.right.isDown) {
-                    this.velocidadActual = Math.min(this.velocidadActual + this.aceleracion, this.velocidadMaxima);
-                    this.personaje.setVelocityX(this.velocidadActual);
-                    this.personaje.flipX = false;
-                } else if (this.keys.left.isDown) {
-                    this.velocidadActual = Math.max(this.velocidadActual - this.aceleracion, -this.velocidadMaxima);
-                    this.personaje.setVelocityX(this.velocidadActual);
-                    this.personaje.flipX = true;
-                } else {
-                    if (this.velocidadActual > 0) {
-                        this.velocidadActual = Math.max(this.velocidadActual - this.frenado, 0);
-                    } else if (this.velocidadActual < 0) {
-                        this.velocidadActual = Math.min(this.velocidadActual + this.frenado, 0);
-                    }
-                    this.personaje.setVelocityX(this.velocidadActual);
-                }
-        
+                this.personaje.setVelocityX(this.velocidadActual);
+            }
+            
+            
                 if (this.personaje.body.touching.down) {
                     if (this.velocidadActual !== 0) {
                         this.personaje.anims.play(esFuego ? "PersonajeFuego-camina" : "PersonajeGrande-camina", true);
@@ -440,27 +445,50 @@ this.bossMuerto = false;
                         this.personaje.setTexture(esFuego ? "PersonajeFuego" : "PersonajeGrande", 0);
                     }
                 }
+                // 💥 Agacharse con el stick hacia abajo
+if (movimiento.y > 0.5 && this.personaje.body.touching.down) {
+    // Animación según power-up
+    if (this.personaje.powerUp === "flor") {
+        this.personaje.anims.play("PersonajeFuego-agachado", true);
+    } else {
+        this.personaje.anims.play("PersonajeGrande-agachado", true);
+    }
+
+    // Achicar la caja de colisión
+    this.personaje.body.setSize(16, 16);
+    this.personaje.body.offset.y = 16; // Bajar el punto de colisión
+} else {
+    // Volver a tamaño normal si no está agachado
+    if (this.personaje.body.height !== 32) {
+        this.personaje.body.setSize(16, 32);
+        this.personaje.body.offset.y = 0;
+    }
+}
+
+
         
-                if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
-                    this.personaje.setVelocityY(-350);
-                    this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
-                    this.estaSaltando = true;
-                    this.tiempoSalto = 0;
-                    this.sonidoSalto.play();
-                } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
-                    this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
-                    this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
-                    this.tiempoSalto++;
-                }
-        
-                if (this.keys.up.isUp) {
-                    this.estaSaltando = false;
-                }
+              // Salto con botón X
+if (this.inputManager.pad?.buttons[0]?.pressed && this.personaje.body.touching.down && !this.estaSaltando) {
+    this.personaje.setVelocityY(-350);
+    const esFuego = this.personaje.powerUp === "flor";
+    this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
+    this.estaSaltando = true;
+    this.tiempoSalto = 0;
+    this.sonidoSalto.play();
+} else if (this.inputManager.pad?.buttons[0]?.pressed && this.estaSaltando && this.tiempoSalto < 18) {
+    this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
+    this.tiempoSalto++;
+}
+
+if (!this.inputManager.pad?.buttons[0]?.pressed) {
+    this.estaSaltando = false;
+}
+
         
                 if (!this.personaje.body.touching.down && !this.estaSaltando) {
                     this.personaje.anims.play(esFuego ? "PersonajeFuego-salta" : "PersonajeGrande-salta", true);
                 }
-            }
+            
         
             if (this.personaje.y > 210) {
                 this.morirPersonaje();

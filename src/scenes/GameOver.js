@@ -10,9 +10,9 @@ export class GameOver extends Scene
     create ()
     {
         this.musicaGameOver = this.sound.add('musicaGameOver');
-        this.cameras.main.setBackgroundColor(0xff0000);
+        this.cameras.main.setBackgroundColor(0x800020);
         this.musicaGameOver.play();
-        this.add.image(512, 384, 'background').setAlpha(0.5);
+      
 
         this.add.text(120, 100, 'Game Over', {
             fontFamily: 'Arial Black', fontSize: 20, color: '#ffffff',
@@ -24,6 +24,7 @@ export class GameOver extends Scene
         const resetButton = this.add.image(50, 200, 'restart').setOrigin(0.5).setScale(0.5).setInteractive();
 
         resetButton.on('pointerdown', () => {
+            this.registry.set('vidas', 3);
             this.scene.start('Game');  // <- Esto reinicia la escena 'Game'
         });
 

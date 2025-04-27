@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-
+import { InputManager } from '../components/InputManager.js';
 
 
 export class Game extends Scene {
@@ -14,9 +14,14 @@ export class Game extends Scene {
     if (this.registry.get('vidas') === undefined) {
         this.registry.set('vidas', 3);
     }
+    this.ultimoDisparo = 0; // ⏳ Guardará el tiempo del último disparo
+    this.cooldownDisparo = 300; // 300 milisegundos de espera entre disparos
 }
 
     create() {
+
+        this.inputManager = new InputManager(this);
+        this.inputManager.setup();
 
         //SONIDOS
         this.sonidoMoneda = this.sound.add('SonidoMoneda')
@@ -426,16 +431,25 @@ export class Game extends Scene {
     }
 
     update() {
-        
-        // No permitir movimiento si está muerto
         if (this.personaje.isDead) return;
     
+        this.inputManager.update();
+        const movimiento = this.inputManager.getMovement();
+    
+        if (this.inputManager.pad?.buttons[2]?.pressed && this.personaje.powerUp === "flor") {
+            const ahora = this.time.now;
+            if (ahora - this.ultimoDisparo >= this.cooldownDisparo) {
+                this.habilitarDisparoFuego();
+                this.ultimoDisparo = ahora;
+            }
+        }
+        
         // Movimiento horizontal
-        if (this.keys.right.isDown) {
+        if (movimiento.x > 0) {
             this.velocidadActual = Math.min(this.velocidadActual + this.aceleracion, this.velocidadMaxima);
             this.personaje.setVelocityX(this.velocidadActual);
             this.personaje.flipX = false;
-        } else if (this.keys.left.isDown) {
+        } else if (movimiento.x < 0) {
             this.velocidadActual = Math.max(this.velocidadActual - this.aceleracion, -this.velocidadMaxima);
             this.personaje.setVelocityX(this.velocidadActual);
             this.personaje.flipX = true;
@@ -448,10 +462,9 @@ export class Game extends Scene {
             this.personaje.setVelocityX(this.velocidadActual);
         }
     
-        // Animación de caminar o quieto (solo si está en el suelo)
+        // Animaciones de caminar o quedarse quieto
         if (this.personaje.body.touching.down) {
             if (this.velocidadActual !== 0) {
-                // Si se mové
                 if (this.personaje.powerUp === "flor") {
                     this.personaje.anims.play("PersonajeFuego-camina", true);
                 } else if (this.personaje.powerUp) {
@@ -460,21 +473,19 @@ export class Game extends Scene {
                     this.personaje.anims.play("personaje-camina", true);
                 }
             } else {
-                // Cuando el personaje está quieto
                 this.personaje.anims.stop();
                 if (this.personaje.powerUp === "flor") {
-                    // Mostrar solo el primer frame de PersonajeFuego (asegurate de que el frame 0 es el idle)
                     this.personaje.setTexture("PersonajeFuego", 0);
                 } else if (this.personaje.powerUp) {
                     this.personaje.setTexture("PersonajeGrande", 0);
                 } else {
                     this.personaje.setTexture("personaje", 0);
                 }
-            }                
+            }
         }
     
-        // Salto: Inicio y prolongación del salto
-        if (this.keys.up.isDown && this.personaje.body.touching.down && !this.estaSaltando) {
+        // Salto
+        if (this.inputManager.pad?.buttons[0]?.pressed && this.personaje.body.touching.down && !this.estaSaltando) {
             this.personaje.setVelocityY(-350);
             if (this.personaje.powerUp === "flor") {
                 this.personaje.anims.play("PersonajeFuego-salta", true);
@@ -486,7 +497,7 @@ export class Game extends Scene {
             this.estaSaltando = true;
             this.tiempoSalto = 0;
             this.sonidoSalto.play();
-        } else if (this.keys.up.isDown && this.estaSaltando && this.tiempoSalto < 18) {
+        } else if (this.inputManager.pad?.buttons[0]?.pressed && this.estaSaltando && this.tiempoSalto < 18) {
             this.personaje.setVelocityY(this.personaje.body.velocity.y - 15);
             if (this.personaje.powerUp === "flor") {
                 this.personaje.anims.play("PersonajeFuego-salta", true);
@@ -498,12 +509,11 @@ export class Game extends Scene {
             this.tiempoSalto++;
         }
     
-        // Soltar salto
-        if (this.keys.up.isUp) {
+        if (!this.inputManager.pad?.buttons[0]?.pressed) {
             this.estaSaltando = false;
         }
     
-        // Animación en el aire (por caída) si no se está saltando activamente
+        // Animación de caída
         if (!this.personaje.body.touching.down && !this.estaSaltando) {
             if (this.personaje.powerUp === "flor") {
                 this.personaje.anims.play("PersonajeFuego-salta", true);
@@ -514,26 +524,23 @@ export class Game extends Scene {
             }
         }
     
-        // Detectar muerte por caída
+        // Detección de muerte por caída
         if (this.personaje.y > 230) {
             this.personaje.isDead = true;
             this.personaje.anims.play("personaje-muere", true);
             this.personaje.setVelocity(0, -400);
-            this.sonidoDead.play()
-            this.MusicaEstrella.stop()
+            this.sonidoDead.play();
+            this.MusicaEstrella.stop();
             this.MusicaNivel1.stop();
-
-            
     
-            // Restar una vida cuando muere por caída
-            this.perderVida();  // Llamar a la función que resta vida
+            this.perderVida();
     
             this.time.delayedCall(2000, () => {
-                this.scene.restart();  // Reiniciar la escena
+                this.scene.restart();
             });
         }
     
-        // Activar goombas
+        // Activar goombas cerca
         this.goombas.children.iterate(goomba => {
             if (!goomba.activado && Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, goomba.x, goomba.y) < 200) {
                 if (goomba.anims.getName() !== "goomba-muerte") {
@@ -544,7 +551,7 @@ export class Game extends Scene {
             }
         });
     
-        // Activar koopa
+        // Activar koopa cerca
         if (!this.koopaActiva) {
             const distancia = Phaser.Math.Distance.Between(this.personaje.x, this.personaje.y, this.koopa.x, this.koopa.y);
             if (distancia < 200 && this.koopa.anims.getName() !== "koopa-muerte") {
@@ -553,6 +560,8 @@ export class Game extends Scene {
                 this.koopaActiva = true;
             }
         }
+    
+        // Cámara sigue al personaje
         const cam = this.cameras.main;
         const mitadPantalla = cam.width / 2;
     
@@ -564,15 +573,16 @@ export class Game extends Scene {
             this.personaje.x = cam.scrollX;
             this.personaje.body.velocity.x = 0;
         }
+    
         if (this.personaje.x >= 3700 && this.MusicaNivel1.isPlaying) {
             this.MusicaNivel1.stop();
             this.MusicaWin1.play();
-        
             this.MusicaWin1.once('complete', () => {
                 this.scene.start('MainMenu');
             });
         }
     }
+    
     
     colisionEnemigoGoomba(personaje, goombas) {
         if (personaje.invencible) {
@@ -1253,90 +1263,80 @@ export class Game extends Scene {
     }
 
     habilitarDisparoFuego = function() {
-        this.input.keyboard.on('keydown-SPACE', () => {
-            if (this.personaje.powerUp === "flor") {
-                const bolaFuego = this.physics.add.sprite(this.personaje.x, this.personaje.y - 10, 'BolaFuego')
-                    .setVelocityX(this.personaje.flipX ? -200 : 200);
-                    this.sonidoProyectil.play()
+        if (this.personaje.powerUp === "flor") {
+            const bolaFuego = this.physics.add.sprite(this.personaje.x, this.personaje.y - 10, 'BolaFuego')
+                .setVelocityX(this.personaje.flipX ? -200 : 200);
     
-                bolaFuego.body.setAllowGravity(false);
-                bolaFuego.anims.play('BolaFuego', true);
-                bolaFuego.setCollideWorldBounds(true);
-                bolaFuego.body.onWorldBounds = true;
+            this.sonidoProyectil.play();
     
-                this.physics.world.on('worldbounds', function(body) {
-                    if (body.gameObject === bolaFuego) {
-                        bolaFuego.destroy();
-                    }
+            bolaFuego.body.setAllowGravity(false);
+            bolaFuego.anims.play('BolaFuego', true);
+            bolaFuego.setCollideWorldBounds(true);
+            bolaFuego.body.onWorldBounds = true;
+    
+            // Destruir bola de fuego al salir del mundo
+            this.physics.world.on('worldbounds', function(body) {
+                if (body.gameObject === bolaFuego) {
+                    bolaFuego.destroy();
+                }
+            });
+    
+            // Colisión con Goombas
+            this.physics.add.overlap(bolaFuego, this.goombas, (bola, goomba) => {
+                goomba.anims.play("goomba-muerte", true);
+                goomba.setVelocityX(0);
+                bola.destroy();
+                this.time.delayedCall(300, () => {
+                    goomba.destroy();
+                    this.sumarPuntos(100);
+                });
+            }, null, this);
+    
+            // Colisión con Koopas
+            this.physics.add.overlap(bolaFuego, this.koopas, (bola, koopa) => {
+                bola.destroy();
+                koopa.destroy();
+                this.sumarPuntos(100);
+    
+                // Mostrar texto flotante de "100"
+                let textoFlotante = this.add.text(koopa.x, koopa.y, '100', {
+                    font: '16px Arial',
+                    fill: '#ffffff',
+                    stroke: '#000000',
+                    strokeThickness: 2
                 });
     
-                // Colisiones con Goombas
-                this.physics.add.overlap(bolaFuego, this.goombas, (bola, goomba) => {
-                    goomba.anims.play("goomba-muerte", true);
-                    goomba.setVelocityX(0);
-                    bola.destroy();
-                    this.time.delayedCall(300, () => {
-                        goomba.destroy();
-                        this.sumarPuntos(100);
-                        let textoFlotante = this.add.text(goomba.x, goomba.y, '100', {
-                            font: '16px Arial',
-                            fill: '#ffffff',
-                            stroke: '#000000',
-                            strokeThickness: 2
-                        });
-                        this.tweens.add({
-                            targets: textoFlotante,
-                            y: goomba.y - 50,
-                            alpha: 0,
-                            duration: 1000,
-                            ease: 'Power1',
-                            onComplete: () => textoFlotante.destroy()
-                        });
-                    });
-                }, null, this);
+                this.tweens.add({
+                    targets: textoFlotante,
+                    y: koopa.y - 50,
+                    alpha: 0,
+                    duration: 1000,
+                    ease: 'Power1',
+                    onComplete: () => textoFlotante.destroy()
+                });
+            }, null, this);
     
-                // Colisiones con Koopa
-                this.physics.add.overlap(bolaFuego, this.koopas, (bola, koopa) => {
-                    bola.destroy();
-                    koopa.destroy();
-                    this.sumarPuntos(100);
-                    let textoFlotante = this.add.text(koopa.x, koopa.y, '100', {
-                        font: '16px Arial',
-                        fill: '#ffffff',
-                        stroke: '#000000',
-                        strokeThickness: 2
-                    });
-                    this.tweens.add({
-                        targets: textoFlotante,
-                        y: koopa.y - 50,
-                        alpha: 0,
-                        duration: 1000,
-                        ease: 'Power1',
-                        onComplete: () => textoFlotante.destroy()
-                    });
-                }, null, this);
+            // Colisiones de la bola de fuego con el mapa
+            this.physics.add.collider(bolaFuego, this.bloqueMisterioso, () => {
+                bolaFuego.destroy();
+            }, null, this);
     
-                this.physics.add.collider(bolaFuego, this.bloqueMisterioso, () => {
-                    bolaFuego.destroy();
-                }, null, this);
+            this.physics.add.collider(bolaFuego, this.bloqueNormal, () => {
+                bolaFuego.destroy();
+            }, null, this);
     
-                this.physics.add.collider(bolaFuego, this.bloqueNormal, () => {
-                    bolaFuego.destroy();
-                }, null, this);
+            this.physics.add.collider(bolaFuego, this.bloquesInmoviles, () => {
+                bolaFuego.destroy();
+            }, null, this);
     
-                this.physics.add.collider(bolaFuego, this.bloquesInmoviles, () => {
-                    bolaFuego.destroy();
-                }, null, this);
+            this.physics.add.collider(bolaFuego, this.bloquesVacios, () => {
+                bolaFuego.destroy();
+            }, null, this);
     
-                this.physics.add.collider(bolaFuego, this.bloquesVacios, () => {
-                    bolaFuego.destroy();
-                }, null, this);
-    
-                this.physics.add.collider(bolaFuego, this.tubos, () => {
-                    bolaFuego.destroy();
-                }, null, this);
-            }
-        });
+            this.physics.add.collider(bolaFuego, this.tubos, () => {
+                bolaFuego.destroy();
+            }, null, this);
+        }
     }
     
     

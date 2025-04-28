@@ -83,12 +83,12 @@ export class Preloader extends Scene
         this.load.image("hongoBueno", "hongoBueno.png")
         this.load.spritesheet('lineaFuego', 'lineaFuego.png', { frameWidth: 16, frameHeight: 48 });
         this.load.spritesheet("personaje", "mario.png" , { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 18, frameHeight: 32 });
+        this.load.spritesheet("PersonajeGrande", "marioGrande.png" , { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet("goomba", "enemigo.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("bloqueMisterioso", "bloque-misterioso.png" , { frameWidth: 16, frameHeight: 16});
         this.load.spritesheet("koopa", "koopa.png" , { frameWidth: 16, frameHeight: 16 });
         this.load.spritesheet("moneda", "moneda.png" , { frameWidth: 16, frameHeight: 16 });
-        this.load.spritesheet("PersonajeFuego", "marioFuego.png" , { frameWidth: 18, frameHeight: 32 });
+        this.load.spritesheet("PersonajeFuego", "marioFuego.png" , { frameWidth: 16, frameHeight: 32 });
         this.load.spritesheet("bolaFuego", "bolaFuego.png" , { frameWidth: 8, frameHeight: 8 });
         this.load.spritesheet("monedaGrande", "monedaGrande.png" , { frameWidth: 10, frameHeight: 13 });
         this.load.spritesheet("Boss", "boss.png" , { frameWidth: 32, frameHeight: 32 });

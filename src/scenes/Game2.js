@@ -311,7 +311,7 @@ this.physics.add.overlap(this.personaje, this.palos, () => {
         
        
         //MENSAJE FINAL
-       this.mensajeFinal = this.add.text(160, 100, '¡GRACIAS MARIO, PERO LA PRINCESA ESTA EN OTRO CASTILLO!', {
+       this.mensajeFinal = this.add.text(160, 100, '¡GRACIAS WEIRD GUY, PERO LA PRINCESA ESTA EN OTRO CASTILLO!', {
         fontSize: '10px',
         color: '#ffffff',
         wordWrap: { width: 200 },
@@ -343,7 +343,7 @@ this.bossMuerto = false;
             }
         }
     });
-    //this.physics.add.overlap(this.bolasBoss, this.personaje, this.morirPersonaje, null, this);
+    this.physics.add.overlap(this.bolasBoss, this.personaje, this.morirPersonaje, null, this);
 
      // texto y puntos
      this.textoPuntos = this.add.text(10, 10, 'Puntos: 0', {
@@ -620,7 +620,7 @@ if (!this.inputManager.pad?.buttons[0]?.pressed) {
 
         // Espera 3 segundos y luego cambia a la escena GameOver
         this.time.delayedCall(5000, () => {
-            this.scene.start('GameOver');
+            this.scene.start('MainMenu');
         });
     }
 

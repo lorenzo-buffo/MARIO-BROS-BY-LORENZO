@@ -97,158 +97,181 @@ export class Preloader extends Scene
     }
     
 
-    create ()
-    {
-          // Crear la animación de personaje
+    create () {
+
+
+        this.anims.create({
+            key: 'small-idle',
+            frames: [{ key: 'personaje', frame: 0 }], // Usa el frame correcto de caída
+            frameRate: 1
+          }); 
+
+           this.anims.create({
+            key: 'big-idle',
+            frames: [{ key: 'PersonajeGrande', frame: 0 }], // Usa el frame correcto de caída
+            frameRate: 1
+          }); 
+
+           this.anims.create({
+            key: 'fire-idle',
+            frames: [{ key: 'PersonajeFuego', frame: 0 }], // Usa el frame correcto de caída
+            frameRate: 1
+          }); 
+
+
+
+        this.anims.create({
+            key: 'small-fall',
+            frames: [{ key: 'personaje', frame: 5 }], // Usa el frame correcto de caída
+            frameRate: 1
+          });
+
           this.anims.create({
-            key: 'personaje-camina',
-            frames: this.anims.generateFrameNumbers('personaje', { start: 1, end: 3}), 
-            frameRate: 12, 
-            repeat: -1 
-        });
-
-        //Crear la animación de personaje grande
+            key: 'big-fall',
+            frames: [{ key: 'PersonajeGrande', frame: 5}],
+            frameRate: 1
+          });
+          
           this.anims.create({
-            key: 'PersonajeGrande-camina',
-            frames: this.anims.generateFrameNumbers('PersonajeGrande', { start: 1, end: 3}), 
-            frameRate: 12, 
-            repeat: -1 
-        });
-
-        //Crear la animación de personaje grande
+            key: 'fire-fall',
+            frames: [{ key: 'PersonajeFuego', frame: 5 }],
+            frameRate: 1
+          });
+          
+        // Animaciones del personaje FSM
         this.anims.create({
-            key: 'PersonajeFuego-camina',
-            frames: this.anims.generateFrameNumbers('PersonajeFuego', { start: 1, end: 3}), 
-            frameRate: 12, 
-            repeat: -1 
+            key: 'small-walk',
+            frames: this.anims.generateFrameNumbers('personaje', { start: 1, end: 3 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-
-        //animacion saltar
+    
         this.anims.create({
-            key: 'personaje-salta',
-            frames: [{ key: 'personaje', frame: 5 }], 
-            frameRate: 1,  
-            repeat: 0
+            key: 'big-walk',
+            frames: this.anims.generateFrameNumbers('PersonajeGrande', { start: 1, end: 3 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-        //animacion saltar
+    
         this.anims.create({
-            key: 'PersonajeGrande-salta',
-            frames: [{ key: 'PersonajeGrande', frame: 5 }], 
-            frameRate: 1,  
-            repeat: 0
+            key: 'fire-walk',
+            frames: this.anims.generateFrameNumbers('PersonajeFuego', { start: 1, end: 3 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-        //animacion saltar
+    
         this.anims.create({
-            key: 'PersonajeFuego-salta',
-            frames: [{ key: 'PersonajeFuego', frame: 5 }], 
-            frameRate: 1,  
-            repeat: 0
+            key: 'small-jump',
+            frames: [{ key: 'personaje', frame: 5 }],
+            frameRate: 1
         });
-
-        //animacion agachado
+    
         this.anims.create({
-            key: 'PersonajeGrande-agachado',
-            frames: [{ key: 'PersonajeGrande', frame: 4 }], 
-            frameRate: 1,  
-            repeat: 0
+            key: 'big-jump',
+            frames: [{ key: 'PersonajeGrande', frame: 5 }],
+            frameRate: 1
         });
-        
-          //animacion agachado
-          this.anims.create({
-            key: 'PersonajeFuego-agachado',
-            frames: [{ key: 'PersonajeFuego', frame: 4 }], 
-            frameRate: 1,  
-            repeat: 0
+    
+        this.anims.create({
+            key: 'fire-jump',
+            frames: [{ key: 'PersonajeFuego', frame: 5 }],
+            frameRate: 1
         });
-
-    //animacion morir
-    this.anims.create({
-        key: 'personaje-muere',
-        frames: [{ key: 'personaje', frame: 4}], 
-        frameRate: 1,  
-        repeat: 0
-    });
-
-//animacion de bloque misterioso
-          this.anims.create({
+    
+        this.anims.create({
+            key: 'big-crouch',
+            frames: [{ key: 'PersonajeGrande', frame: 4 }],
+            frameRate: 1
+        });
+    
+        this.anims.create({
+            key: 'fire-crouch',
+            frames: [{ key: 'PersonajeFuego', frame: 4 }],
+            frameRate: 1
+        });
+    
+        this.anims.create({
+            key: 'small-dead',
+            frames: [{ key: 'personaje', frame: 4 }],
+            frameRate: 1
+        });
+    
+        // Animación de bloque misterioso
+        this.anims.create({
             key: 'bloqueMisteriosoAnim',
-            frames: this.anims.generateFrameNumbers('bloqueMisterioso', { start: 0, end: 2}), 
-            frameRate: 3, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('bloqueMisterioso', { start: 0, end: 2 }),
+            frameRate: 3,
+            repeat: -1
         });
-        //enemigo muerte GOOMBA
+    
+        // Goomba
         this.anims.create({
             key: 'goomba-muerte',
-            frames: [{ key: 'goomba', frame: 2 }], 
-            frameRate: 1,  
-            repeat: 0
+            frames: [{ key: 'goomba', frame: 2 }],
+            frameRate: 1
         });
-        //animacion caminar goomba
+    
         this.anims.create({
             key: 'goomba-camina',
-            frames: this.anims.generateFrameNumbers('goomba', { start: 0, end: 1}), 
-            frameRate: 12, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('goomba', { start: 0, end: 1 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-        //agregar animacion de koopa
+    
+        // Koopa
         this.anims.create({
             key: 'koopa-camina',
-            frames: this.anims.generateFrameNumbers('koopa', { start: 0, end: 1}), 
-            frameRate: 12, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('koopa', { start: 0, end: 1 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-        //agregar animacion de moneda
+    
+        // Moneda
         this.anims.create({
             key: 'monedaGira',
-            frames: this.anims.generateFrameNumbers('moneda', { start: 0, end: 3}), 
-            frameRate: 1, 
-            repeat: 0 
+            frames: this.anims.generateFrameNumbers('moneda', { start: 0, end: 3 }),
+            frameRate: 1
         });
-
-        //agregar animacion bola de fuego
+    
+        // Bola de fuego
         this.anims.create({
             key: 'BolaFuego',
-            frames: this.anims.generateFrameNumbers('bolaFuego', { start: 0, end: 1}), 
-            frameRate: 12, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('bolaFuego', { start: 0, end: 1 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-        // Crear la animación de personaje
+    
+        // Moneda grande
         this.anims.create({
             key: 'monedaGrande',
-            frames: this.anims.generateFrameNumbers('monedaGrande', { start: 0, end: 2}), 
-            frameRate: 12, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('monedaGrande', { start: 0, end: 2 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-         // Crear la animación de boss
-         this.anims.create({
+    
+        // Boss
+        this.anims.create({
             key: 'BossCamina',
-            frames: this.anims.generateFrameNumbers('Boss', { start: 0, end: 3}), 
-            frameRate: 12, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('Boss', { start: 0, end: 3 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-        // Crear la animación de ataque boss
+    
         this.anims.create({
             key: 'BossAtaca',
-            frames: this.anims.generateFrameNumbers('ataqueEnemigo', { start: 0, end: 1}), 
-            frameRate: 12, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('ataqueEnemigo', { start: 0, end: 1 }),
+            frameRate: 12,
+            repeat: -1
         });
-
-         // Crear LINEA FUEGO
-         this.anims.create({
+    
+        // Línea de fuego
+        this.anims.create({
             key: 'lineaFuegoActiva',
-            frames: this.anims.generateFrameNumbers('lineaFuego', { start: 0, end: 1}), 
-            frameRate: 12, 
-            repeat: -1 
+            frames: this.anims.generateFrameNumbers('lineaFuego', { start: 0, end: 1 }),
+            frameRate: 12,
+            repeat: -1
         });
+    
 
         this.scene.start('MainMenu');
     }
